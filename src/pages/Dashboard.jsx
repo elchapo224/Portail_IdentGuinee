@@ -88,10 +88,10 @@ const Dashboard = () => {
     };
     
     // On ne synchronise que si des données cruciales manquent
-    if (user && (!user.date_naissance || !user.id_acte_lie)) {
+    if (user && (!user.date_naissance || !user.id_acte_lie || !user.genre)) {
       syncData();
     }
-  }, [user, updateUser]);
+  }, [user?.id, user?.date_naissance, user?.id_acte_lie]);
 
   return (
     <div className="layout-wrapper">
