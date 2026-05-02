@@ -291,3 +291,26 @@
   align-items: center;
   gap: 4px;
 }
+
+/* ── Zone Upload ── */
+.upload-zone {
+  border: 2px dashed #006D44;
+  border-radius: 12px;
+  padding: 32px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: background 0.2s;
+  color: #444;
+}
+.upload-zone:hover {
+  background: #f0fdf4;
+}
+.upload-zone p {
+  margin: 8px 0 0;
+  font-size: 14px;
+}
+
+/* ── Verification icon ── */
+.verify-icon { display: flex; align-items: center; }
+.verify-icon.success { color: #006D44; }
+.verify-icon.error { color: #CE1126; }

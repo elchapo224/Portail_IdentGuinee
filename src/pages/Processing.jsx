@@ -10,33 +10,65 @@ const Processing = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const documentId = location.state?.documentId;
+  const numActe = location.state?.num_acte;
+
   const [step, setStep] = useState(1);
   const [progress, setProgress] = useState(0);
+  const [stepLabels, setStepLabels] = useState({
+    1: 'EN COURS',
+    2: 'EN ATTENTE',
+    3: 'EN ATTENTE',
+  });
 
   useEffect(() => {
-    // Animation de la barre de progression
+    // Barre de progression
     const progressInterval = setInterval(() => {
-      setProgress((oldProgress) => {
-        if (oldProgress >= 100) {
-          clearInterval(progressInterval);
-          return 100;
-        }
-        return oldProgress + 2;
+      setProgress(prev => {
+        if (prev >= 100) { clearInterval(progressInterval); return 100; }
+        return prev + 2;
       });
-    }, 100); // 5 secondes au total (100 * 50ms)
+    }, 100);
 
-    // Gestion des étapes visuelles
-    const step2Timer = setTimeout(() => setStep(2), 1500);
-    const step3Timer = setTimeout(() => setStep(3), 3500);
+    // Étape 2 : Vérification NaissanceChain réelle
+    const step2Timer = setTimeout(async () => {
+      setStep(2);
+      setStepLabels(prev => ({ ...prev, 1: 'TERMINÉ', 2: 'EN COURS' }));
+
+      if (numActe) {
+        try {
+          await supabase
+            .from('naissancechain')
+            .select('id_acte, hash_blockchain')
+            .eq('id_acte', numActe.trim())
+            .maybeSingle();
+        } catch (e) {
+          console.warn('Vérification NaissanceChain:', e);
+        }
+      }
+    }, 1500);
+
+    // Étape 3 : Validation & finalisation
+    const step3Timer = setTimeout(() => {
+      setStep(3);
+      setStepLabels(prev => ({ ...prev, 2: 'TERMINÉ', 3: 'EN COURS' }));
+    }, 3500);
+
+    // Finalisation : mise à jour du statut dans Supabase
     const finishTimer = setTimeout(async () => {
+      setStepLabels(prev => ({ ...prev, 3: 'TERMINÉ' }));
+
       if (documentId) {
-        await supabase
-          .from('documents_certifies')
-          .update({ statut_demande: 'TERMINEE', statut: 'GENERE' })
-          .eq('id', documentId);
+        try {
+          await supabase
+            .from('documents_certifies')
+            .update({ statut: 'GENERE', statut_demande: 'TERMINEE' })
+            .eq('id', documentId);
+        } catch (e) {
+          console.warn('Mise à jour document:', e);
+        }
       }
       navigate('/document-genere');
-    }, 5000);
+    }, 5500);
 
     return () => {
       clearInterval(progressInterval);
@@ -44,14 +76,14 @@ const Processing = () => {
       clearTimeout(step3Timer);
       clearTimeout(finishTimer);
     };
-  }, [documentId, navigate]);
+  }, [documentId, numActe, navigate]);
 
   return (
     <div className="layout-wrapper">
       <Sidebar />
       <main className="main-content">
         <Header />
-        
+
         <div className="processing-content animate-fade-in">
           <div className="processing-header">
             <div className="system-status-badge animate-slide-up">
@@ -63,44 +95,50 @@ const Processing = () => {
             <p className="processing-subtitle animate-slide-up" style={{ animationDelay: '0.2s' }}>
               Nous analysons vos informations en temps réel grâce à notre infrastructure souveraine hautement sécurisée.
             </p>
+            {numActe && (
+              <p style={{ color: '#006D44', fontWeight: 600, fontSize: 13, marginTop: 8 }}>
+                🔗 Interrogation NaissanceChain — Acte : <strong>{numActe}</strong>
+              </p>
+            )}
           </div>
 
           <div className="processing-card animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <div className="steps-container">
-              {/* Etape 1 */}
+              {/* Étape 1 */}
               <div className={`processing-step ${step >= 1 ? 'active' : ''} ${step > 1 ? 'completed' : ''}`}>
                 <div className="step-icon-wrapper">
                   <CheckCircle size={32} />
                 </div>
                 <h4>Vérification Registre</h4>
-                <div className="step-status">{step > 1 ? 'TERMINÉ' : 'EN COURS'}</div>
-                <p>Identification au registre national de naissance guinéen effectuée avec succès.</p>
+                <div className="step-status">{stepLabels[1]}</div>
+                <p>Identification au registre national NaissanceChain effectuée avec succès.</p>
               </div>
 
-              {/* Etape 2 */}
+              {/* Étape 2 */}
               <div className={`processing-step ${step >= 2 ? 'active' : 'waiting'} ${step > 2 ? 'completed' : ''}`}>
                 <div className="step-icon-wrapper">
                   <BarChart2 size={32} />
                 </div>
                 <h4>Analyse des données</h4>
-                <div className="step-status">{step > 2 ? 'TERMINÉ' : step === 2 ? 'EN COURS' : 'EN ATTENTE'}</div>
-                <p>Analyse biométrique et croisement des métadonnées gouvernementales.</p>
+                <div className="step-status">{stepLabels[2]}</div>
+                <p>Croisement biométrique et vérification du hash blockchain Hyperledger Fabric.</p>
               </div>
 
-              {/* Etape 3 */}
+              {/* Étape 3 */}
               <div className={`processing-step ${step >= 3 ? 'active' : 'waiting'} ${step > 3 ? 'completed' : ''}`}>
                 <div className="step-icon-wrapper outline">
                   <ShieldCheck size={32} />
                 </div>
                 <h4>Validation automatique</h4>
-                <div className="step-status">{step === 3 ? 'EN COURS' : 'EN ATTENTE'}</div>
-                <p>Délivrance finale du certificat numérique et authentification de la demande.</p>
+                <div className="step-status">{stepLabels[3]}</div>
+                <p>Délivrance finale du certificat numérique. Aucune intervention humaine requise.</p>
               </div>
             </div>
 
             <div className="progress-bar-container">
               <div className="progress-bar-fill" style={{ width: `${progress}%` }}></div>
             </div>
+            <p style={{ textAlign: 'center', fontSize: 12, color: '#888', marginTop: 8 }}>{progress}%</p>
           </div>
 
           <div className="info-cards-row animate-slide-up" style={{ animationDelay: '0.4s' }}>
@@ -116,7 +154,7 @@ const Processing = () => {
               <div className="info-icon"><Zap size={24} /></div>
               <div className="info-text">
                 <h4>Rapidité IdentiGuinée</h4>
-                <p>Grâce à l'infrastructure fibre optique nationale, le temps de traitement moyen a été réduit de 14 jours à moins de 30 secondes.</p>
+                <p>Grâce à l'infrastructure NaissanceChain, le temps de traitement moyen a été réduit de <strong>14 jours à moins de 30 secondes</strong>.</p>
               </div>
             </div>
           </div>

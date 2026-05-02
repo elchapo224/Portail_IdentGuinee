@@ -8,6 +8,7 @@ import DocumentGenere from './pages/DocumentGenere'
 import Tracking from './pages/Tracking'
 import Documents from './pages/Documents'
 import Settings from './pages/Settings'
+import Aide from './pages/Aide'
 import './App.css'
 
 const PrivateRoute = ({ children }) => {
@@ -28,12 +29,11 @@ function App() {
           <Route path="/suivi" element={<PrivateRoute><Tracking /></PrivateRoute>} />
           <Route path="/documents" element={<PrivateRoute><Documents /></PrivateRoute>} />
           <Route path="/parametres" element={<PrivateRoute><Settings /></PrivateRoute>} />
+          <Route path="/aide" element={<PrivateRoute><Aide /></PrivateRoute>} />
         </Routes>
       </Router>
     </AuthProvider>
   )
 }
-
-
 
 export default App
