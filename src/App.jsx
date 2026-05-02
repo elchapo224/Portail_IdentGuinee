@@ -12,6 +12,7 @@ import Notifications from './pages/Notifications'
 import Aide from './pages/Aide'
 import Settings from './pages/Settings'
 import Verifier from './pages/Verifier'
+import Services from './pages/Services'
 import './App.css'
 
 const PrivateRoute = ({ children }) => {
@@ -29,6 +30,7 @@ function App() {
             <Route path="/verifier/:id" element={<Verifier />} />
             <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
             <Route path="/nouvelle-demande" element={<PrivateRoute><DemandForm /></PrivateRoute>} />
+            <Route path="/services" element={<PrivateRoute><Services /></PrivateRoute>} />
             <Route path="/traitement" element={<PrivateRoute><Processing /></PrivateRoute>} />
             <Route path="/document-genere" element={<PrivateRoute><DocumentGenere /></PrivateRoute>} />
             <Route path="/suivi" element={<PrivateRoute><Tracking /></PrivateRoute>} />
@@ -42,7 +44,5 @@ function App() {
     </AuthProvider>
   )
 }
-
-
 
 export default App

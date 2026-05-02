@@ -61,48 +61,6 @@ const Documents = () => {
     fetchDocuments();
   }, [user?.id]);
 
-  const [isSimulating, setIsSimulating] = useState(false);
-
-  const handleSimulate = async () => {
-    try {
-      setIsSimulating(true);
-      const targetUserId = user?.id || 'd3b07384-d113-4ec2-8830-4b99cc739314'; // Fallback ID for demo
-      
-      console.log("Simulating documents for user:", targetUserId);
-
-      const testDocs = [
-        {
-          citoyen_id: targetUserId,
-          id_acte: '001/RC/CK/2026',
-          statut: 'GENERE',
-          date_generation: new Date().toISOString(),
-          hash_document: 'sha256:7f83b1627ff26b'
-        },
-        {
-          citoyen_id: targetUserId,
-          id_acte: '085/MA/2024',
-          statut: 'GENERE',
-          date_generation: new Date(Date.now() - 86400000 * 5).toISOString(),
-          hash_document: 'sha256:a82c3d4e5f6g7h'
-        }
-      ];
-
-      const { error } = await supabase.from('documents_certifies').insert(testDocs);
-      
-      if (error) {
-        console.error("Simulation error:", error);
-        alert("Erreur lors de la simulation : " + error.message);
-      } else {
-        alert("Documents simulés avec succès !");
-        window.location.reload();
-      }
-    } catch (err) {
-      console.error("Unexpected error:", err);
-    } finally {
-      setIsSimulating(false);
-    }
-  };
-
   const formatDate = (dateValue) =>
     new Date(dateValue).toLocaleDateString('fr-FR', {
       day: '2-digit',
@@ -161,7 +119,7 @@ const Documents = () => {
                   </div>
                   
                   <div style={{ display: 'flex', gap: '12px', marginTop: 'auto' }}>
-                    <Link to="/document-genere" state={{ documentType: 'extrait_naissance' }} style={{ flex: 1, textAlign: 'center', padding: '12px', backgroundColor: '#F8F9FA', color: '#1A1A1A', borderRadius: '100px', fontSize: '13px', fontWeight: '700', textDecoration: 'none' }}>
+                    <Link to="/document-genere" state={{ documentId: doc.id, documentType: 'extrait_naissance' }} style={{ flex: 1, textAlign: 'center', padding: '12px', backgroundColor: '#F8F9FA', color: '#1A1A1A', borderRadius: '100px', fontSize: '13px', fontWeight: '700', textDecoration: 'none' }}>
                       Consulter
                     </Link>
                     <button style={{ padding: '12px', backgroundColor: '#F8F9FA', color: '#1A1A1A', borderRadius: '100px', border: 'none', cursor: 'pointer' }}>

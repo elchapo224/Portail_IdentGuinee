@@ -16,13 +16,23 @@ const Tracking = () => {
         return;
       }
 
-      const { data } = await supabase
+      // 1. Récupérer les documents certifiés
+      const { data: certDocs } = await supabase
         .from('documents_certifies')
         .select('id, id_acte, statut_demande, statut, created_at, date_generation')
-        .eq('citoyen_id', user.id)
-        .order('date_generation', { ascending: false });
+        .eq('citoyen_id', parseInt(user.id))
+        .order('created_at', { ascending: false });
 
-      setDocuments(data || []);
+      // 2. Récupérer le statut actuel du citoyen (pour les demandes en attente)
+      const { data: citoyen } = await supabase
+        .from('citoyens')
+        .select('statut_demande, id_acte_lie')
+        .eq('id', parseInt(user.id))
+        .single();
+
+      let finalDocs = certDocs || [];
+
+      setDocuments(finalDocs);
     };
 
     fetchTracking();
