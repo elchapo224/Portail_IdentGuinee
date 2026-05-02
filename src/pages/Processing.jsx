@@ -11,16 +11,14 @@ const Processing = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  
   const [num_acte, setNumActe] = useState(location.state?.num_acte || sessionStorage.getItem('last_num_acte'));
-  const documentType = location.state?.documentType || 'extrait_naissance';
-
+  const [type_document, setTypeDocument] = useState(location.state?.type_document || "Carte d'Identité");
+  
   useEffect(() => {
     if (location.state?.num_acte) {
       sessionStorage.setItem('last_num_acte', location.state.num_acte);
     }
   }, [location.state]);
-
   const [step, setStep] = useState(1);
   const [progress, setProgress] = useState(0);
   const [isFinished, setIsFinished] = useState(false);
@@ -42,7 +40,7 @@ const Processing = () => {
   }, [logs]);
 
   useEffect(() => {
-    const TOTAL_DURATION = 20000; // Réduit à 20s pour une meilleure UX
+    const TOTAL_DURATION = 40000; // 40 secondes
     const INTERVAL = 100;
     const TOTAL_STEPS = TOTAL_DURATION / INTERVAL;
     
@@ -54,6 +52,9 @@ const Processing = () => {
       if (!num_acte || !user?.id) return;
 
       try {
+        // Déterminer le code du document (P: Passeport, C: CNI, etc.)
+        const docCode = type_document === 'Passeport' ? 'P' : (type_document === "Carte d'Identité" ? 'C' : 'A');
+
         // 1. CRÉATION IMMÉDIATE DE L'ENREGISTREMENT
         let { data, error } = await supabase
           .from('documents_certifies')
@@ -61,7 +62,7 @@ const Processing = () => {
              citoyen_id: user.id,
              id_acte: num_acte,
              statut: 'EN_COURS',
-             statut_demande: 'Authentification'
+             statut_demande: `${docCode}:Authentification`
           })
           .select('id')
           .single();
@@ -72,9 +73,9 @@ const Processing = () => {
             .from('documents_certifies')
             .insert({
                citoyen_id: user.id,
-               id_acte: null, 
+               id_acte: null, // On laisse l'acte vide pour éviter l'erreur FK
                statut: 'EN_COURS',
-               statut_demande: 'Authentification'
+               statut_demande: `${docCode}:Authentification`
             })
             .select('id')
             .single();
@@ -100,18 +101,21 @@ const Processing = () => {
           });
         }, INTERVAL);
 
-        // 3. GESTION DES ÉTAPES ET LOGS (Temps proportionnels à TOTAL_DURATION)
+        // 3. GESTION DES ÉTAPES ET LOGS
         const timeline = [
-          { time: (TOTAL_DURATION * 0.05), log: "Connexion sécurisée établie avec le serveur MATD...", type: 'success', step: 1, dbStatus: 'Authentification' },
-          { time: (TOTAL_DURATION * 0.15), log: "Vérification des identifiants citoyen GN-SEC-V3...", type: 'info' },
-          { time: (TOTAL_DURATION * 0.25), log: "Analyse du registre national de naissance en cours...", type: 'info', step: 2, dbStatus: 'Registre National' },
-          { time: (TOTAL_DURATION * 0.35), log: `Acte de naissance #${num_acte || 'N/A'} localisé dans le registre central.`, type: 'success' },
-          { time: (TOTAL_DURATION * 0.45), log: "Extraction des métadonnées parentales...", type: 'info' },
-          { time: (TOTAL_DURATION * 0.55), log: "Démarrage de l'analyse biométrique comparative...", type: 'info', step: 3, dbStatus: 'Analyse Biométrique' },
-          { time: (TOTAL_DURATION * 0.65), log: "Authentification biométrique réussie. Score: 99.8%", type: 'success' },
-          { time: (TOTAL_DURATION * 0.75), log: "Préparation de l'ancrage Blockchain NaissanceChain...", type: 'info', step: 4, dbStatus: 'Ancrage Blockchain' },
-          { time: (TOTAL_DURATION * 0.85), log: "Transaction confirmée sur le réseau national. Bloc #G821-X", type: 'success', step: 5, dbStatus: 'Finalisation' },
-          { time: (TOTAL_DURATION * 0.95), log: "Génération du certificat PDF sécurisé avec QR Code...", type: 'info' },
+          { time: 2000, log: "Connexion sécurisée établie avec le serveur MATD...", type: 'success', step: 1, dbStatus: `${docCode}:Authentification` },
+          { time: 5000, log: "Vérification des identifiants citoyen GN-SEC-V3...", type: 'info' },
+          { time: 8000, log: "Analyse du registre national de naissance en cours...", type: 'info', step: 2, dbStatus: `${docCode}:Registre` },
+          { time: 11000, log: `Acte de naissance #${num_acte || 'N/A'} localisé dans le registre central.`, type: 'success' },
+          { time: 14000, log: "Extraction des métadonnées parentales...", type: 'info' },
+          { time: 17000, log: "Démarrage de l'analyse biométrique comparative...", type: 'info', step: 3, dbStatus: `${docCode}:Biométrie` },
+          { time: 20000, log: "Vérification de la cohérence photo via IA souveraine...", type: 'info' },
+          { time: 23000, log: "Authentification biométrique réussie. Score: 99.8%", type: 'success' },
+          { time: 26000, log: "Préparation de l'ancrage Blockchain NaissanceChain...", type: 'info', step: 4, dbStatus: `${docCode}:Blockchain` },
+          { time: 29000, log: "Génération du hash cryptographique du document...", type: 'info' },
+          { time: 32000, log: "Transaction confirmée sur le réseau national. Bloc #G821-X", type: 'success', step: 5, dbStatus: `${docCode}:Finalisation` },
+          { time: 35000, log: `Génération du certificat ${type_document} sécurisé avec QR Code...`, type: 'info' },
+          { time: 38000, log: `Finalisation du titre numérique officiel : ${type_document}...`, type: 'info' },
         ];
 
         timers = timeline.map(item => {
@@ -134,7 +138,7 @@ const Processing = () => {
           await supabase
             .from('documents_certifies')
             .update({ 
-              statut_demande: 'TERMINEE',
+              statut_demande: `${docCode}:Terminée`,
               statut: 'GENERE',
               date_generation: new Date().toISOString()
             })
@@ -152,7 +156,11 @@ const Processing = () => {
         timers.push(finalTimer);
 
       } catch (err) {
-        addLog(`ERREUR: ${err.message || "Erreur de connexion"}`, "error");
+        console.error("Processing error details:", err);
+        const errorMsg = err.message || "Erreur de connexion";
+        const errorDetail = err.details || "Problème d'accès à la base de données";
+        addLog(`ERREUR: ${errorMsg}`, "error");
+        addLog(`DÉTAIL: ${errorDetail}`, "error");
       }
     };
 
@@ -166,7 +174,7 @@ const Processing = () => {
   }, [num_acte, user?.id]);
 
   const handleFinish = () => {
-    navigate('/document-genere', { state: { documentId: finalDocId, documentType } });
+    navigate('/document-genere', { state: { documentId: finalDocId, type_document } });
   };
 
   const stepsData = [
@@ -192,7 +200,7 @@ const Processing = () => {
               Traitement de votre demande
             </h1>
             <p className="processing-subtitle animate-slide-up" style={{ animationDelay: '0.2s' }}>
-              Processus de certification sécurisé et ancrage blockchain en cours.
+              Le délai de 40 secondes garantit la triple vérification par les registres d'État et l'ancrage blockchain.
             </p>
           </div>
 

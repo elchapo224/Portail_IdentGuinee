@@ -1,11 +1,10 @@
-import React, { useState, useEffect, Component } from 'react';
-import { useLocation } from 'react-router-dom';
+import React, { useEffect, useState, Component } from 'react';
 import { ChevronRight, Share2, Download, Shield, Info, CheckCircle, Smartphone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLocation } from 'react-router-dom';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
 import { supabase } from '../lib/supabase';
-import { DOCUMENT_TYPES, getDocumentTypeLabel } from '../lib/documentTypes';
 import './DocumentGenere.css';
 
 class ErrorBoundary extends Component {
@@ -32,39 +31,58 @@ class ErrorBoundary extends Component {
 const DocumentGenereContent = () => {
   const { user } = useAuth();
   const location = useLocation();
-  const typeValue = location.state?.documentType || DOCUMENT_TYPES.CNI.value;
-  const selectedDocumentType = getDocumentTypeLabel(typeValue) || "Document officiel certifié";
-  const isBirthExtract = typeValue === DOCUMENT_TYPES.NAISSANCE.value;
   const documentId = location.state?.documentId;
-
-  const [docId, setDocId] = useState(documentId || null);
   const [docData, setDocData] = useState(null);
+  const [citoyenData, setCitoyenData] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Déterminer le type de document (Passeport ou CNI)
+  const [type_document, setTypeDocument] = useState(location.state?.type_document || "Carte d'Identité");
 
   useEffect(() => {
     const loadData = async () => {
       if (!user?.id) return;
       
+      // Charger les détails du citoyen
+      const { data: citoyen } = await supabase
+        .from('citoyens')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      setCitoyenData(citoyen);
+
+      // Charger le document généré
       let docQuery = supabase.from('documents_certifies').select('*').eq('citoyen_id', user.id);
       
-      if (docId) {
-        docQuery = docQuery.eq('id', docId);
+      if (documentId) {
+        docQuery = docQuery.eq('id', documentId);
       } else {
-        docQuery = docQuery.order('created_at', { ascending: false }).limit(1);
+        docQuery = docQuery.order('date_generation', { ascending: false }).limit(1);
       }
 
       const { data: docs } = await docQuery;
       
       if (docs && docs.length > 0) {
-        setDocData(docs[0]);
-        setDocId(docs[0].id);
+        const doc = docs[0];
+        setDocData(doc);
+        
+        // Si le type n'est pas passé en state, on le déduit du statut_demande stocké en base
+        if (!location.state?.type_document && doc.statut_demande) {
+          if (doc.statut_demande.startsWith('P:')) setTypeDocument('Passeport');
+          if (doc.statut_demande.startsWith('C:')) setTypeDocument('Carte d\'Identité');
+        }
       }
       
       setLoading(false);
     };
 
     loadData();
-  }, [user?.id, docId]);
+  }, [user?.id, documentId, location.state?.type_document]);
+
+  const getVerificationUrl = () => {
+    return `${window.location.origin}/verify/${docData?.id}`;
+  };
 
   const formatDate = (dateString) => {
     if (!dateString) return 'Aujourd\'hui';
@@ -80,31 +98,22 @@ const DocumentGenereContent = () => {
     return date.toLocaleDateString('fr-FR', { day: 'numeric', month: 'long', year: 'numeric' }) + ' à ' + date.toLocaleTimeString('fr-FR');
   };
 
-  const verificationUrl = docId ? `${window.location.origin}/verifier/${docId}` : `${window.location.origin}/login`;
-
-  const birthData = {
-    acteNumber: docData?.id_acte || '001/RC/CK/2026',
-    registre: 'Registre de naissances 2026 - Commune de Kindia',
-    declarationDate: formatDate(docData?.created_at),
-    declarationPlace: 'Mairie de Conakry',
-    gender: user?.sexe || 'M',
-    birthPlace: user?.lieu_naissance || 'Conakry',
-    birthDate: user?.date_naissance || '12/05/1992',
-    father: user?.nom_pere || 'Mamadou DIALLO',
-    mother: user?.nom_mere || 'Aissata KONE',
-    domicile: 'Quartier Camayenne, Conakry',
-    issuerTitle: 'Officier d\'état civil',
-    issuer: 'M. Sory KABA',
-    issuerSignature: 'S.K',
-    city: 'Conakry',
-    date: formatDate(docData?.created_at),
-    decorationStatement: 'Cet extrait certifie la déclaration de naissance conforme aux registres officiels de l\'État civil'
-  };
+  if (loading) {
+    return (
+      <div className="layout-wrapper">
+        <Sidebar />
+        <main className="main-content">
+          <Header />
+          <div style={{ padding: '40px', textAlign: 'center' }}>Chargement du document...</div>
+        </main>
+      </div>
+    );
+  }
 
   const handleDownloadPDF = async () => {
     const element = document.getElementById('official-doc-container');
     if (!element || !window.html2canvas || !window.jspdf) {
-      window.print(); // Fallback to print
+      alert("Préparation du moteur PDF... Réessayez dans une seconde.");
       return;
     }
 
@@ -117,7 +126,9 @@ const DocumentGenereContent = () => {
       
       const imgData = canvas.toDataURL('image/png');
       const { jsPDF } = window.jspdf;
-      const imgWidth = canvas.width * 0.264583 / 2;
+      
+      // Calcul des dimensions en mm (1px approx 0.264583mm)
+      const imgWidth = canvas.width * 0.264583 / 2; // /2 car scale=2
       const imgHeight = canvas.height * 0.264583 / 2;
       
       const pdf = new jsPDF({
@@ -130,14 +141,13 @@ const DocumentGenereContent = () => {
       pdf.save(`IdentiGuinee_${user?.nom || 'Document'}.pdf`);
     } catch (err) {
       console.error("PDF Download error:", err);
-      window.print();
     }
   };
 
   const handleDownloadPNG = async () => {
     const element = document.getElementById('official-doc-container');
     if (!element || !window.html2canvas) {
-      alert("La capture d'image n'est pas encore prête.");
+      alert("La capture d'image n'est pas encore prête. Veuillez réessayer dans un instant.");
       return;
     }
     
@@ -158,18 +168,6 @@ const DocumentGenereContent = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="layout-wrapper">
-        <Sidebar />
-        <main className="main-content">
-          <Header />
-          <div style={{ padding: '40px', textAlign: 'center' }}>Chargement du document...</div>
-        </main>
-      </div>
-    );
-  }
-
   return (
     <div className="layout-wrapper">
       <Sidebar />
@@ -181,7 +179,7 @@ const DocumentGenereContent = () => {
             <div className="doc-header-left">
               <nav className="breadcrumbs">
                 <span>MES DOCUMENTS</span> <ChevronRight size={14} />
-                <span className="active">{isBirthExtract ? 'EXTRAIT DE NAISSANCE' : 'ATTESTATION D\'IDENTITÉ'}</span>
+                <span className="active">ATTESTATION D'IDENTITÉ</span>
               </nav>
               <h1 className="doc-title">Votre Document est Prêt</h1>
               <p className="doc-subtitle">Document officiel généré et sécurisé par les services de l'État.</p>
@@ -197,270 +195,352 @@ const DocumentGenereContent = () => {
           </div>
 
           <div className="doc-grid animate-slide-up" style={{ animationDelay: '0.2s' }}>
+            {/* Colonne Principale - Le Document */}
             <div className="document-container" id="official-doc-container">
-              {isBirthExtract ? (
-                <div className="birth-document-card official-style">
-                  <div className="birth-document-border">
-                    <div className="birth-document-inner">
-                      <div className="birth-official-header">
-                        <div className="birth-official-header-top">
-                          <div className="header-top-left">
-                            <p>RÉPUBLIQUE DE GUINÉE</p>
-                            <p className="motto">TRAVAIL - JUSTICE - SOLIDARITÉ</p>
-                          </div>
-                          <div className="header-top-center">
-                            <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Coat_of_arms_of_Guinea.svg/200px-Coat_of_arms_of_Guinea.svg.png" alt="Armoiries" className="armoiries-gold" />
-                          </div>
-                          <div className="header-top-right">
-                            <p>MINISTÈRE DE LA JUSTICE</p>
-                            <p>DIRECTION NATIONALE DE L'ÉTAT CIVIL</p>
-                          </div>
-                        </div>
-                        
-                        <div className="birth-main-title">
-                          <h1>Acte de Naissance</h1>
-                          <p className="subtitle-english">Certificate of Birth</p>
-                          <h2 className="title-bold-large">Acte De Naissance</h2>
-                        </div>
-
-                        <div className="location-info-grid">
-                          <div className="location-box">
-                            <div className="location-row">
-                              <span className="label">Ville / Préfecture / RÉGION :</span>
-                              <span className="value">{birthData.city}</span>
-                            </div>
-                            <div className="location-row">
-                              <span className="label">Commune :</span>
-                              <span className="value">MATAM</span>
-                            </div>
-                          </div>
-                          <div className="issuer-box">
-                            <span className="label">Je Soussigné :</span>
-                            <span className="value">{birthData.issuer}</span>
-                          </div>
-                        </div>
+              {type_document === 'Passeport' ? (
+                <>
+                  {/* PASSEPORT RECTO */}
+                  <div className="official-document doc-passport-recto">
+                    <div className="passport-top-header">
+                      <div className="rep-left">
+                        <h3 className="rep-title">RÉPUBLIQUE DE GUINÉE</h3>
+                        <p className="card-type">PASSEPORT / PASSPORT</p>
                       </div>
-
-                      <div className="birth-official-section">
-                        <div className="section-title-banner">ENFANT</div>
-                        <div className="official-table">
-                          <div className="table-row">
-                            <div className="table-cell label-cell">NOM / LAST NAME</div>
-                            <div className="table-cell value-cell bold uppercase">{user?.nom || 'DIALLO'}</div>
-                          </div>
-                          <div className="table-row">
-                            <div className="table-cell label-cell">PRÉNOMS / GIVEN NAMES</div>
-                            <div className="table-cell value-cell bold">{user?.prenom || 'Mamadou'}</div>
-                          </div>
-                          <div className="table-row split">
-                            <div className="row-part">
-                              <div className="table-cell label-cell">NÉ LE / DATE OF BIRTH</div>
-                              <div className="table-cell value-cell">{birthData.birthDate}</div>
-                            </div>
-                            <div className="row-part">
-                              <div className="table-cell label-cell">SEXE / SEX</div>
-                              <div className="table-cell value-cell">{birthData.gender === 'M' ? 'MASCULIN' : 'FÉMININ'}</div>
-                            </div>
-                          </div>
-                          <div className="table-row">
-                            <div className="table-cell label-cell">LIEU DE NAISSANCE / PLACE OF BIRTH</div>
-                            <div className="table-cell value-cell">{birthData.birthPlace}</div>
-                          </div>
+                      <div className="rep-right" style={{ display: 'flex', gap: '24px' }}>
+                        <div className="info-mini">
+                          <label>Type / Type</label>
+                          <p>PO</p>
                         </div>
-                      </div>
-
-                      <div className="birth-official-section">
-                        <div className="section-title-banner">PERE</div>
-                        <div className="official-table">
-                          <div className="table-row">
-                            <div className="table-cell label-cell">NOM DU PERE / FATHER'S NAME</div>
-                            <div className="table-cell value-cell">{birthData.father}</div>
-                          </div>
-                          <div className="table-row">
-                            <div className="table-cell label-cell">LIEU DE NAISSANCE / PLACE OF BIRTH</div>
-                            <div className="table-cell value-cell">CONAKRY</div>
-                          </div>
+                        <div className="info-mini">
+                          <label>Code du Pays / Country Code</label>
+                          <p>GIN</p>
                         </div>
-                      </div>
-
-                      <div className="birth-official-section">
-                        <div className="section-title-banner">MERE</div>
-                        <div className="official-table">
-                          <div className="table-row">
-                            <div className="table-cell label-cell">NOM DE LA MERE / MOTHER'S NAME</div>
-                            <div className="table-cell value-cell">{birthData.mother}</div>
-                          </div>
-                          <div className="table-row">
-                            <div className="table-cell label-cell">LIEU DE NAISSANCE / PLACE OF BIRTH</div>
-                            <div className="table-cell value-cell">KINDIA</div>
-                          </div>
-                        </div>
-                      </div>
-
-                      <div className="birth-official-footer">
-                        <div className="footer-top-text">
-                          <p>Fait à {birthData.city}, le {birthData.date}</p>
-                          <p>L'Officier de l'état civil délégué</p>
-                        </div>
-                        
-                        <div className="official-seals-container">
-                          <div className="seal-left">
-                            <div className="blue-stamp">
-                              <div className="inner-stamp">
-                                <span>Officier de l'état civil délégué</span>
-                              </div>
-                            </div>
-                          </div>
-                          
-                          <div className="seal-center">
-                            <div className="qr-official">
-                              <img src={`https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=${encodeURIComponent(verificationUrl)}`} alt="QR Code" />
-                              <div className="id-number">{birthData.acteNumber}</div>
-                            </div>
-                          </div>
-
-                          <div className="seal-right">
-                            <div className="red-jagged-seal">
-                              <div className="seal-content">
-                                <Shield size={24} />
-                                <span>CERTIFIÉ</span>
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-                        
-                        <div className="watermark-overlay">
-                          <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Coat_of_arms_of_Guinea.svg/200px-Coat_of_arms_of_Guinea.svg.png" alt="" />
-                        </div>
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              ) : (
-                /* --- DESIGN CARTE D'IDENTITÉ CEDEAO (OFFICIEL) --- */
-                <div className="ecowas-id-card">
-                  <div className="card-background-overlay">
-                    <div className="guinea-map-watermark"></div>
-                  </div>
-                  
-                  <div className="ecowas-header">
-                    <div className="ecowas-logo-container">
-                      <img src="https://upload.wikimedia.org/wikipedia/en/thumb/1/12/ECOWAS_logo.svg/1200px-ECOWAS_logo.svg.png" alt="CEDEAO" className="ecowas-logo" />
-                    </div>
-                    
-                    <div className="ecowas-titles">
-                      <h1 className="rep-guinee-title">RÉPUBLIQUE DE GUINÉE</h1>
-                      <h2 className="card-main-title">CARTE D'IDENTITÉ CEDEAO</h2>
-                      <p className="card-sub-titles">ECOWAS IDENTITY CARD / BILHETE DE IDENTIDADE CEDEAO</p>
-                    </div>
-                    
-                    <div className="guinea-flag-container">
-                      <div className="guinea-flag"></div>
-                    </div>
-                  </div>
-
-                  <div className="ecowas-body">
-                    <div className="ecowas-left-col">
-                      <div className="main-id-photo-wrapper">
-                        <img src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="ID" />
-                      </div>
-                      <div className="signature-container-id">
-                        <p className="label-italic">Signature / Signature</p>
-                        <div className="signature-graphic">
-                          {user?.prenom?.charAt(0)}. {user?.nom}
+                        <div className="info-mini">
+                          <label>Passeport No / Passport No</label>
+                          <p>{docData?.id ? `GN${String(docData.id).padStart(7, '0')}` : '000000000'}</p>
                         </div>
                       </div>
                     </div>
 
-                    <div className="ecowas-middle-col">
-                      <div className="data-field">
-                        <label>Nom / Surname</label>
-                        <p className="data-val bold-upper">{user?.nom || 'CAMARA'}</p>
-                      </div>
-                      <div className="data-field">
-                        <label>Prénom / First name</label>
-                        <p className="data-val bold-upper">{user?.prenom || 'SALEMATOU'}</p>
-                      </div>
-                      <div className="data-field">
-                        <label>Nationalité / Nationality</label>
-                        <p className="data-val bold-upper">GUINÉENNE</p>
-                      </div>
-                      <div className="data-field">
-                        <label>Date de naissance / Date of birth</label>
-                        <p className="data-val">{user?.date_naissance || '26 DEC 1986'}</p>
-                      </div>
-                      <div className="data-field">
-                        <label>Date d'émission / Date of issuance</label>
-                        <p className="data-val">31 MAY 2024</p>
-                      </div>
-                      <div className="data-field">
-                        <label>Date d'expiration / Date of expiry</label>
-                        <p className="data-val">31 MAY 2029</p>
-                      </div>
-                      <div className="data-field id-number-field">
-                        <label>Numéro d'identité / ID number</label>
-                        <p className="data-val-large">{user?.matricule?.replace('GN-', '') || '2226122311020046'}</p>
-                      </div>
-                    </div>
-
-                    <div className="ecowas-right-col">
-                      <div className="right-top-data">
-                        <div className="data-field">
-                          <label>Sexe / Sex</label>
-                          <p className="data-val-box">{user?.sexe?.charAt(0) || 'F'}</p>
-                        </div>
-                        <div className="data-field">
-                          <label>Taille / Height</label>
-                          <p className="data-val-box">1,64 m</p>
+                    <div className="doc-body" style={{ marginTop: '20px' }}>
+                      <div className="doc-photo-col">
+                        <img src={user?.avatar} alt="Photo ID" className="id-photo" style={{ height: '160px' }} />
+                        <div className="ghost-photo" style={{ opacity: 0.3, width: '60px', height: '80px', borderRadius: '8px', overflow: 'hidden', margin: '0 auto' }}>
+                           <img src={user?.avatar} alt="Ghost" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
                         </div>
                       </div>
                       
-                      <div className="ghost-photo-oval">
-                        <img src={user?.avatar || "https://api.dicebear.com/7.x/avataaars/svg?seed=Felix"} alt="Ghost" className="ghost-photo" />
+                      <div className="doc-info-col passport-info">
+                        <div className="info-group">
+                          <label>Nom / Surname</label>
+                          <p className="info-val uppercase">{user?.nom}</p>
+                        </div>
+                        <div className="info-group">
+                          <label>Prénoms / Given Names</label>
+                          <p className="info-val uppercase">{user?.prenom}</p>
+                        </div>
+                        <div className="info-group">
+                          <label>Nationalité / Nationality</label>
+                          <p className="info-val">GUINÉENNE</p>
+                        </div>
+                        
+                        <div className="info-row-passport">
+                          <div className="info-group">
+                            <label>Sexe / Sex</label>
+                            <p className="info-val">{citoyenData?.genre || 'F'}</p>
+                          </div>
+                          <div className="info-group">
+                            <label>Numéro Personnel / Personal No</label>
+                            <p className="info-val">{citoyenData?.id ? `50010301${String(citoyenData.id).padStart(7, '0')}` : '500103010001030'}</p>
+                          </div>
+                        </div>
+
+                        <div className="info-row-passport">
+                          <div className="info-group">
+                            <label>Date de Naissance / Date of Birth</label>
+                            <p className="info-val">{formatDate(citoyenData?.date_naissance)}</p>
+                          </div>
+                          <div className="info-group">
+                            <label>Lieu de Naissance / Place of Birth</label>
+                            <p className="info-val uppercase">{citoyenData?.lieu_naissance || 'DALABA'}</p>
+                          </div>
+                        </div>
+
+                        <div className="info-row-passport">
+                          <div className="info-group">
+                            <label>Date de Délivrance / Date of Issue</label>
+                            <p className="info-val">{formatDate(docData?.date_generation || docData?.created_at)}</p>
+                          </div>
+                          <div className="info-group">
+                            <label>Autorité / Authority</label>
+                            <p className="info-val">DCPAF</p>
+                          </div>
+                        </div>
+
+                        <div className="info-group">
+                          <label>Date d'Expiration / Date of Expiry</label>
+                          <p className="info-val">{
+                            docData?.date_generation ? 
+                              formatDate(new Date(new Date(docData.date_generation).setFullYear(new Date(docData.date_generation).getFullYear() + 5))) :
+                              '01 AOÛT 2029'
+                          }</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mrz-code passport-mrz">
+                      P&lt;GIN{(user?.nom || 'SYLLA').toUpperCase()}&lt;&lt;{(user?.prenom || 'IBRAHIMA<SORY').toUpperCase()}&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;<br/>
+                      0000000008GIN7605024M23080105001030100013006
+                    </div>
+                  </div>
+
+                  {/* PASSEPORT VERSO (Description Page) */}
+                  <div className="official-document doc-passport-verso" style={{ marginTop: '32px' }}>
+                    <div className="verso-header" style={{ borderBottom: '1px solid rgba(0,0,0,0.1)', padding: '24px 32px' }}>
+                       <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#1A1A1A', textAlign: 'center', letterSpacing: '2px' }}>SIGNALEMENT DESCRIPTION</h3>
+                    </div>
+                    <div className="doc-body" style={{ padding: '32px 48px', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                       <div className="info-line">
+                          <label>Fonction / Function</label>
+                          <p className="info-val-line uppercase">{citoyenData?.profession || '...'}</p>
+                       </div>
+                       <div className="info-line">
+                          <label>Taille / Height</label>
+                          <p className="info-val-line">
+                             {citoyenData?.taille ? 
+                                (citoyenData.taille.includes('.') || citoyenData.taille.includes(',') ? 
+                                   `${Math.round(parseFloat(citoyenData.taille.replace(',', '.')) * 100)} cm` : 
+                                   `${citoyenData.taille} cm`) : 
+                                '...'}
+                          </p>
+                       </div>
+                       <div className="info-line">
+                          <label>Signes Particuliers / Distinguishing Marks</label>
+                          <p className="info-val-line uppercase">{citoyenData?.signes_particuliers || 'NÉANT'}</p>
+                       </div>
+                       <div className="info-line" style={{ marginTop: '12px' }}>
+                          <label>Domicile / Home Address</label>
+                          <p className="info-val-line uppercase" style={{ fontSize: '14px', lineHeight: '1.6' }}>{citoyenData?.domicile || '...'}</p>
+                       </div>
+                       
+                       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: '30px' }}>
+                          <div className="holder-signature" style={{ flex: 1, borderTop: '1px solid #ddd', paddingTop: '16px' }}>
+                             <label style={{ fontSize: '10px', color: '#666' }}>Signature du titulaire / Holder's Signature</label>
+                             <div style={{ fontFamily: "'Brush Script MT', cursive", fontSize: '32px', marginTop: '8px' }}>
+                                {user?.prenom} {user?.nom}
+                             </div>
+                          </div>
+                          <div className="passport-verify-qr" style={{ textAlign: 'center' }}>
+                             <img src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(getVerificationUrl())}`} alt="QR Code" style={{ border: '4px solid white', boxShadow: '0 4px 10px rgba(0,0,0,0.1)' }} />
+                             <p style={{ fontSize: '8px', color: '#006D44', fontWeight: 'bold', marginTop: '4px' }}>VERIFY AUTHENTICITY</p>
+                          </div>
+                       </div>
+                    </div>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {/* RECTO CNI */}
+                  <div className="official-document doc-recto">
+                    <div className="doc-top-bar"></div>
+                    
+                    <div className="doc-republic-header">
+                      <div className="republic-left">
+                        <img src="https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Coat_of_arms_of_Guinea.svg/200px-Coat_of_arms_of_Guinea.svg.png" alt="Armoiries" className="armoiries-img" />
+                        <div>
+                          <h3 className="rep-title">RÉPUBLIQUE DE GUINÉE</h3>
+                          <p className="rep-motto">TRAVAIL - JUSTICE - SOLIDARITÉ</p>
+                        </div>
+                      </div>
+                      <div className="republic-right">
+                        <h3 className="card-type" style={{ textTransform: 'uppercase' }}>{type_document} BIOMÉTRIQUE</h3>
+                        <p className="card-id">N° ID: {citoyenData?.id || user?.id}</p>
+                      </div>
+                    </div>
+
+                    <div className="doc-body">
+                      <div className="doc-photo-col">
+                        <img src={user?.avatar} alt="Photo ID" className="id-photo" />
+                        <div className="signature-area">
+                          <p className="signature-label">SIGNATURE</p>
+                          <p className="signature-text">{String(user?.prenom || '').charAt(0)}. {user?.nom}</p>
+                        </div>
+                      </div>
+                      
+                      <div className="doc-info-col">
+                        <div className="info-group">
+                          <label>Nom / Surname</label>
+                          <p className="info-val uppercase">{user?.nom}</p>
+                        </div>
+                        <div className="info-group">
+                          <label>Prénom / First name</label>
+                          <p className="info-val">{user?.prenom}</p>
+                        </div>
+                        <div className="info-group">
+                          <label>Nationalité / Nationality</label>
+                          <p className="info-val">GUINEENNE</p>
+                        </div>
+                        <div className="info-row-2">
+                          <div className="info-group">
+                            <label>Sexe / Sex</label>
+                            <p className="info-val">{citoyenData?.genre || 'F'}</p>
+                          </div>
+                          <div className="info-group">
+                            <label>Taille / Height</label>
+                            <p className="info-val">{citoyenData?.taille ? `${citoyenData.taille} m` : '1,64 m'}</p>
+                          </div>
+                        </div>
+                        <div className="info-group">
+                          <label>Date de naissance / Date of birth</label>
+                          <p className="info-val">{formatDate(citoyenData?.date_naissance)}</p>
+                        </div>
+                        <div className="info-row-2">
+                          <div className="info-group">
+                            <label>Date d'émission / Date of issuance</label>
+                            <p className="info-val">{formatDate(docData?.date_generation || docData?.created_at)}</p>
+                          </div>
+                          <div className="info-group">
+                            <label>Date d'expiration / Date of expiry</label>
+                            <p className="info-val">{
+                              docData?.date_generation ? 
+                                formatDate(new Date(new Date(docData.date_generation).setFullYear(new Date(docData.date_generation).getFullYear() + 5))) :
+                                '31 MAY 2029'
+                            }</p>
+                          </div>
+                        </div>
+                        <div className="info-group">
+                          <label>Numéro d'identité / ID number</label>
+                          <p className="info-val">{citoyenData?.id || user?.id}</p>
+                        </div>
+                        <div className="info-group">
+                          <label>Lieu de délivrance / Place of issuance</label>
+                          <p className="info-val">CONAKRY / M.S.P.C</p>
+                        </div>
                       </div>
 
-                      <div className="qr-code-embedded">
-                         <img src={`https://api.qrserver.com/v1/create-qr-code/?size=100x100&data=${encodeURIComponent(verificationUrl)}`} alt="QR Code" />
-                         <div className="qr-label">SECURITY SCAN</div>
+                      <div className="doc-qr-col">
+                        <div className="qr-wrapper">
+                          <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(getVerificationUrl())}`} alt="QR Code" />
+                        </div>
+                        <div className="blockchain-badge">
+                          <Shield size={12} /> VÉRIFIÉ BLOCKCHAIN
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="doc-footer">
+                      <div className="signature-stamp">
+                        <CheckCircle size={16} color="#006D44" />
+                        <div className="stamp-text">
+                          <p className="stamp-label">SIGNÉ ÉLECTRONIQUEMENT</p>
+                          <p className="stamp-ministry">Ministère de la Sécurité et de la Protection Civile</p>
+                        </div>
+                      </div>
+                      <div className="generation-timestamp">
+                        Généré le {formatDateTime(docData?.date_generation || docData?.created_at)}
                       </div>
                     </div>
                   </div>
 
-                  <div className="ecowas-footer-id">
-                     <div className="issuance-place">
-                       <label>Lieu de délivrance / Place of issuance</label>
-                       <p>CONAKRY / M.S.P.C</p>
-                     </div>
-                     
-                     <div className="authority-signature">
-                        <p className="label-italic">Signature de l'autorité</p>
-                        <div className="auth-sig-img"></div>
-                     </div>
+                  {/* VERSO CNI */}
+                  <div className="official-document doc-verso" style={{ marginTop: '32px' }}>
+                    <div className="doc-republic-header" style={{ borderBottom: '1px solid rgba(0,0,0,0.05)', paddingBottom: '12px', alignItems: 'center' }}>
+                      <div style={{ display: 'flex', width: '100%', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                        <div style={{ display: 'flex', flexDirection: 'column' }}>
+                          <span style={{ fontSize: '11px', color: '#666' }}>Code pays</span>
+                          <span style={{ fontWeight: 'bold', fontSize: '14px' }}>GIN</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'center', flex: 1 }}>
+                          <h3 className="rep-title" style={{ margin: 0, fontSize: '16px' }}>RÉPUBLIQUE DE GUINÉE</h3>
+                          <span style={{ fontSize: '11px', color: '#666', marginTop: '6px' }}>Autorité de délivrance</span>
+                          <span style={{ fontSize: '12px', fontWeight: '600' }}>Le Directeur Général de la Police Nationale</span>
+                        </div>
+                        <div style={{ display: 'flex', flexDirection: 'column', textAlign: 'right' }}>
+                          <span style={{ fontSize: '11px', color: '#666' }}>NIN</span>
+                          <span style={{ fontWeight: 'bold', fontSize: '14px' }}>286122600388415</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="doc-body" style={{ padding: '20px 24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+                      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '20px', width: '100%' }}>
+                        <div className="info-group">
+                          <label>Lieu de naissance</label>
+                          <p className="info-val uppercase">{citoyenData?.commune || 'MATOTO'}<br/>{citoyenData?.prefecture || 'CONAKRY'}</p>
+                        </div>
+                        <div className="info-group">
+                          <label>Préfecture</label>
+                          <p className="info-val uppercase">{citoyenData?.prefecture || 'CONAKRY'}</p>
+                        </div>
+                        
+                        <div className="info-group">
+                          <label>Région/Region</label>
+                          <p className="info-val uppercase">{citoyenData?.region || 'CONAKRY'}</p>
+                        </div>
+                        
+                        <div className="info-group">
+                          <label>Sous-préfecture/Commune</label>
+                          <p className="info-val uppercase">{citoyenData?.commune || 'MATOTO'}</p>
+                        </div>
+
+                        <div className="info-group">
+                          <label>Quartier/District</label>
+                          <p className="info-val uppercase">{citoyenData?.quartier || 'GBESSIA CENTRE'}</p>
+                        </div>
+
+                        <div className="info-group">
+                          <label>Secteur/Village</label>
+                          <p className="info-val uppercase">{citoyenData?.secteur || '02'}</p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="mrz-code" style={{ 
+                      fontFamily: 'monospace', 
+                      background: 'rgba(255, 255, 255, 0.4)', 
+                      padding: '20px 24px', 
+                      letterSpacing: '4px', 
+                      fontSize: '16px', 
+                      lineHeight: '1.6',
+                      fontWeight: '600',
+                      borderBottomLeftRadius: '16px',
+                      borderBottomRightRadius: '16px',
+                      color: '#1a1a1a'
+                    }}>
+                      I&lt;GIN222612231&lt;10200466&lt;&lt;&lt;&lt;&lt;&lt;&lt;<br/>
+                      8612261F2905316GIN&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;2<br/>
+                      {(user?.nom || 'CAMARA').toUpperCase()}&lt;&lt;{(user?.prenom || 'SALEMATOU').toUpperCase()}&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;
+                    </div>
                   </div>
-                </div>
+                </>
               )}
             </div>
 
-            <aside className="doc-sidebar no-print">
+            {/* Sidebar Droite */}
+            <aside className="doc-sidebar">
               <div className="sidebar-card details-card">
                 <h3>Détails du Document</h3>
                 <ul className="details-list">
                   <li>
                     <span className="det-label">Type</span>
-                    <span className="det-val">{selectedDocumentType}</span>
+                    <span className="det-val">Attestation d'Identité</span>
                   </li>
                   <li>
                     <span className="det-label">Format</span>
-                    <span className="det-val">CEDEAO / Biométrique</span>
+                    <span className="det-val">PDF / Digital Wallet</span>
                   </li>
                   <li>
-                    <span className="det-label">Validité</span>
-                    <span className="det-val">5 Ans</span>
+                    <span className="det-label">Poids</span>
+                    <span className="det-val">1.2 MB</span>
+                  </li>
+                  <li>
+                    <span className="det-label">Expiration</span>
+                    <span className="det-val">24 Oct. 2031</span>
                   </li>
                 </ul>
                 <div className="info-alert">
                   <Info size={16} />
-                  <p>Cette carte est conforme aux standards de la CEDEAO et permet la libre circulation dans l'espace communautaire.</p>
+                  <p>Ce document est protégé par un filigrane numérique et peut être vérifié à tout moment via l'application mobile IdentiGuinée.</p>
                 </div>
               </div>
 
@@ -478,7 +558,7 @@ const DocumentGenereContent = () => {
                     <div className="timeline-icon success"><CheckCircle size={14} /></div>
                     <div className="timeline-content">
                       <p className="tl-title">Document généré</p>
-                      <p className="tl-time">{formatDateTime(docData?.created_at)}</p>
+                      <p className="tl-time">Aujourd'hui, 14:32</p>
                     </div>
                   </div>
                   <div className="timeline-item active">
@@ -486,6 +566,13 @@ const DocumentGenereContent = () => {
                     <div className="timeline-content">
                       <p className="tl-title">Validation biométrique</p>
                       <p className="tl-time">Aujourd'hui, 14:28</p>
+                    </div>
+                  </div>
+                  <div className="timeline-item">
+                    <div className="timeline-icon"><CheckCircle size={14} /></div>
+                    <div className="timeline-content">
+                      <p className="tl-title">Demande soumise</p>
+                      <p className="tl-time">Hier, 09:15</p>
                     </div>
                   </div>
                 </div>

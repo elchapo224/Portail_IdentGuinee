@@ -83,8 +83,26 @@ const Tracking = () => {
                   </tr>
                 )}
                 {documents.map((doc) => {
+                  const rawStatutDemande = doc.statut_demande || '';
+                  const hasPrefix = rawStatutDemande.includes(':');
+                  const docTypeCode = hasPrefix ? rawStatutDemande.split(':')[0] : 'A';
+                  const cleanStatutDemande = hasPrefix ? rawStatutDemande.split(':')[1] : rawStatutDemande;
+
+                  const docNames = {
+                    'P': 'Passeport GN',
+                    'C': 'Carte d\'Identité GN',
+                    'A': 'Acte de Naissance GN',
+                    'E': 'Extrait de Naissance GN',
+                    'D': 'Permis de Conduire GN',
+                    'G': 'Carte Grise GN',
+                    'J': 'Casier Judiciaire GN',
+                    'N': 'Certificat de Nationalité GN'
+                  };
+
+                  const docName = docNames[docTypeCode] || 'Document Officiel GN';
+                  
                   const statutValue = (doc.statut || '').toUpperCase();
-                  const statutDemandeValue = (doc.statut_demande || '').toUpperCase();
+                  const statutDemandeValue = cleanStatutDemande.toUpperCase();
                   const isDone =
                     statutValue === 'GENERE' ||
                     statutValue === 'GÉNÉRÉ' ||
@@ -99,8 +117,8 @@ const Tracking = () => {
                           <FileText size={20} />
                         </div>
                         <div>
-                          <p style={{ fontWeight: '700', fontSize: '15px' }}>{doc.id_acte ? `Acte ${doc.id_acte}` : 'Document certifié'}</p>
-                          <p style={{ fontSize: '13px', color: '#868E96' }}>Demande citoyenne</p>
+                          <p style={{ fontWeight: '700', fontSize: '15px' }}>{docName}</p>
+                          <p style={{ fontSize: '13px', color: '#868E96' }}>Ref: {doc.id_acte || 'N/A'}</p>
                         </div>
                       </td>
                       <td style={{ padding: '24px', fontSize: '14px', fontFamily: 'monospace' }}>REQ-{doc.id}-GN</td>
@@ -108,7 +126,7 @@ const Tracking = () => {
                       <td style={{ padding: '24px' }}>
                         {!isDone ? (
                           <span style={{ padding: '6px 12px', backgroundColor: '#FFF3BF', color: '#E67700', borderRadius: '100px', fontSize: '12px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
-                            <Clock size={14} /> {doc.statut_demande || 'En cours de traitement'}
+                            <Clock size={14} /> {cleanStatutDemande || 'En cours'}
                           </span>
                         ) : (
                           <span style={{ padding: '6px 12px', backgroundColor: '#E7F6F0', color: '#006D44', borderRadius: '100px', fontSize: '12px', fontWeight: '700', display: 'inline-flex', alignItems: 'center', gap: '6px' }}>

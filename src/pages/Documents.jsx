@@ -9,53 +9,22 @@ import { supabase } from '../lib/supabase';
 const Documents = () => {
   const { user } = useAuth();
   const [documents, setDocuments] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  // Données de secours pour la démo si la DB est vide
-  const MOCK_DOCUMENTS = [
-    {
-      id: 'demo-1',
-      id_acte: '001/RC/CK/2026',
-      statut: 'GENERE',
-      date_generation: new Date().toISOString(),
-      hash_document: 'sha256:7f83b1627ff26b'
-    },
-    {
-      id: 'demo-2',
-      id_acte: '085/MA/2024',
-      statut: 'GENERE',
-      date_generation: new Date(Date.now() - 86400000 * 5).toISOString(),
-      hash_document: 'sha256:a82c3d4e5f6g7h'
-    }
-  ];
 
   useEffect(() => {
     const fetchDocuments = async () => {
-      setLoading(true);
-      try {
-        const targetId = user?.id;
-        
-        if (targetId) {
-          const { data, error } = await supabase
-            .from('documents_certifies')
-            .select('id, id_acte, statut, created_at, date_generation, pdf_url, qr_code_url, hash_document')
-            .eq('citoyen_id', targetId)
-            .order('date_generation', { ascending: false });
-
-          if (!error && data && data.length > 0) {
-            setDocuments(data);
-          } else {
-            // Fallback sur les mocks si vide
-            setDocuments(MOCK_DOCUMENTS);
-          }
-        } else {
-          setDocuments(MOCK_DOCUMENTS);
-        }
-      } catch (err) {
-        setDocuments(MOCK_DOCUMENTS);
-      } finally {
-        setLoading(false);
+      if (!user?.id) {
+        setDocuments([]);
+        return;
       }
+
+      const { data } = await supabase
+        .from('documents_certifies')
+        .select('id, id_acte, statut, statut_demande, created_at, date_generation, pdf_url, qr_code_url, hash_document')
+        .eq('citoyen_id', parseInt(user.id))
+        .eq('statut', 'GENERE')
+        .order('created_at', { ascending: false });
+
+      setDocuments(data || []);
     };
 
     fetchDocuments();
@@ -75,15 +44,10 @@ const Documents = () => {
         <Header />
         
         <div className="processing-content animate-fade-in" style={{ alignItems: 'flex-start', textAlign: 'left' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', width: '100%' }}>
-            <nav className="breadcrumbs animate-slide-up">
-              <span>TABLEAU DE BORD</span> <ChevronRight size={14} />
-              <span className="active">MES DOCUMENTS</span>
-            </nav>
-            <div style={{ fontSize: '10px', fontWeight: '800', color: '#059669', backgroundColor: '#ecfdf5', padding: '4px 10px', borderRadius: '100px', border: '1px solid #059669' }}>
-              MODE DÉMO ACTIF
-            </div>
-          </div>
+          <nav className="breadcrumbs animate-slide-up">
+            <span>TABLEAU DE BORD</span> <ChevronRight size={14} />
+            <span className="active">MES DOCUMENTS</span>
+          </nav>
           
           <h2 className="page-title animate-slide-up" style={{ marginTop: '16px', marginBottom: '8px' }}>
             Vos documents sécurisés
@@ -92,13 +56,33 @@ const Documents = () => {
             Retrouvez tous vos documents officiels certifiés par NaissanceChain.
           </p>
 
-          {loading ? (
-             <div style={{ padding: '40px', textAlign: 'center', width: '100%' }}>
-               <p>Chargement des documents sécurisés...</p>
-             </div>
-          ) : (
-            <div className="services-grid animate-slide-up" style={{ width: '100%' }}>
-              {documents.map((doc) => (
+          <div className="services-grid animate-slide-up" style={{ width: '100%' }}>
+            {documents.length === 0 && (
+              <div className="form-card" style={{ padding: '24px' }}>
+                <p style={{ fontSize: '14px', color: '#868E96' }}>
+                  Aucun document généré pour le moment.
+                </p>
+              </div>
+            )}
+            {documents.map((doc) => {
+              const rawStatutDemande = doc.statut_demande || '';
+              const hasPrefix = rawStatutDemande.includes(':');
+              const docTypeCode = hasPrefix ? rawStatutDemande.split(':')[0] : 'A';
+              
+              const docNames = {
+                'P': 'Passeport GN',
+                'C': 'Carte d\'Identité GN',
+                'A': 'Acte de Naissance GN',
+                'E': 'Extrait de Naissance GN',
+                'D': 'Permis de Conduire GN',
+                'G': 'Carte Grise GN',
+                'J': 'Casier Judiciaire GN',
+                'N': 'Certificat de Nationalité GN'
+              };
+              
+              const docName = docNames[docTypeCode] || 'Document Officiel GN';
+
+              return (
                 <div key={doc.id} className="form-card" style={{ padding: '24px', display: 'flex', flexDirection: 'column', gap: '20px' }}>
                   <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                     <div style={{ padding: '12px', backgroundColor: '#E7F6F0', color: '#006D44', borderRadius: '12px', display: 'inline-block' }}>
@@ -111,25 +95,43 @@ const Documents = () => {
                   
                   <div>
                     <h4 style={{ fontSize: '18px', fontWeight: '700', marginBottom: '4px' }}>
-                      {doc.id_acte ? `Acte ${doc.id_acte}` : 'Document certifié'}
+                      {docName}
                     </h4>
                     <p style={{ fontSize: '13px', color: '#868E96' }}>
                       Généré le {formatDate(doc.date_generation || doc.created_at)}
                     </p>
                   </div>
-                  
-                  <div style={{ display: 'flex', gap: '12px', marginTop: 'auto' }}>
-                    <Link to="/document-genere" state={{ documentId: doc.id, documentType: 'extrait_naissance' }} style={{ flex: 1, textAlign: 'center', padding: '12px', backgroundColor: '#F8F9FA', color: '#1A1A1A', borderRadius: '100px', fontSize: '13px', fontWeight: '700', textDecoration: 'none' }}>
-                      Consulter
-                    </Link>
+                
+                <div style={{ display: 'flex', gap: '12px', marginTop: 'auto' }}>
+                  <Link 
+                    to="/document-genere" 
+                    state={{ 
+                      documentId: doc.id, 
+                      type_document: docTypeCode === 'P' ? 'Passeport' : 'Carte d\'Identité' 
+                    }}
+                    style={{ flex: 1, textAlign: 'center', padding: '12px', backgroundColor: '#F8F9FA', color: '#1A1A1A', borderRadius: '100px', fontSize: '13px', fontWeight: '700', textDecoration: 'none' }}
+                  >
+                    Consulter
+                  </Link>
+                  {doc.pdf_url ? (
+                    <a
+                      href={doc.pdf_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      style={{ padding: '12px', backgroundColor: '#F8F9FA', color: '#1A1A1A', borderRadius: '100px', border: 'none', cursor: 'pointer', display: 'inline-flex', alignItems: 'center' }}
+                    >
+                      <Download size={18} />
+                    </a>
+                  ) : (
                     <button style={{ padding: '12px', backgroundColor: '#F8F9FA', color: '#1A1A1A', borderRadius: '100px', border: 'none', cursor: 'pointer' }}>
                       <Download size={18} />
                     </button>
-                  </div>
+                  )}
                 </div>
-              ))}
-            </div>
-          )}
+              </div>
+            );
+          })}
+          </div>
         </div>
       </main>
     </div>

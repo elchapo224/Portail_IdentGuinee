@@ -5,14 +5,13 @@ import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
-import { DOCUMENT_TYPES, DOCUMENT_TYPE_OPTIONS, getDocumentTypeLabel } from '../lib/documentTypes';
 import './DemandForm.css';
 
 const DemandForm = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const selectedDocumentType = location.state?.documentType || DOCUMENT_TYPES.CNI.value;
+  const selectedDocumentType = location.state?.documentType || "Carte d'Identité";
 
   const [currentStep, setCurrentStep] = useState(1);
 
@@ -27,7 +26,16 @@ const DemandForm = () => {
     telephone: user?.telephone || '',
     nom_pere: user?.nom_pere || '',
     nom_mere: user?.nom_mere || '',
-    num_acte: user?.id_acte_lie || ''
+    num_acte: user?.id_acte_lie || '',
+    taille: user?.taille || '',
+    region: user?.region || '',
+    prefecture: user?.prefecture || '',
+    commune: user?.commune || '',
+    quartier: user?.quartier || '',
+    secteur: user?.secteur || '',
+    profession: user?.profession || '',
+    domicile: user?.domicile || '',
+    signes_particuliers: user?.signes_particuliers || 'NÉANT'
   });
 
   // Mise à jour du formulaire dès que les données utilisateur sont disponibles (après sync)
@@ -43,7 +51,16 @@ const DemandForm = () => {
         telephone: user.telephone || prev.telephone,
         nom_pere: user.nom_pere || prev.nom_pere,
         nom_mere: user.nom_mere || prev.nom_mere,
-        num_acte: user.id_acte_lie || prev.num_acte
+        num_acte: user.id_acte_lie || prev.num_acte,
+        taille: user.taille || prev.taille,
+        region: user.region || prev.region,
+        prefecture: user.prefecture || prev.prefecture,
+        commune: user.commune || prev.commune,
+        quartier: user.quartier || prev.quartier,
+        secteur: user.secteur || prev.secteur,
+        profession: user.profession || prev.profession,
+        domicile: user.domicile || prev.domicile,
+        signes_particuliers: user.signes_particuliers || prev.signes_particuliers
       }));
     }
   }, [user]);
@@ -88,7 +105,6 @@ const DemandForm = () => {
   const handleSubmitDemand = async () => {
     if (!user?.id) {
       setSubmitError('Utilisateur non authentifié. Veuillez vous reconnecter.');
-      setIsSubmitting(false);
       return;
     }
 
@@ -96,25 +112,59 @@ const DemandForm = () => {
     setSubmitError('');
 
     try {
-      // 1. On essaie de lier l'acte réel
+      // 1. On essaie de lier l'acte réel (si l'utilisateur a tapé un vrai numéro)
       let { error } = await supabase
         .from('citoyens')
         .update({
           id_acte_lie: formData.num_acte,
-          statut_demande: 'EN_ATTENTE'
+          statut_demande: 'EN_ATTENTE',
+          taille: formData.taille,
+          profession: formData.profession,
+          domicile: formData.domicile,
+          signes_particuliers: formData.signes_particuliers,
+          region: formData.region,
+          prefecture: formData.prefecture,
+          commune: formData.commune,
+          quartier: formData.quartier,
+          secteur: formData.secteur
         })
         .eq('id', user.id);
 
       // 2. Repli de sécurité pour la démo: Si le numéro d'acte n'existe pas dans naissancechain 
-      // (erreur de Foreign Key "23503"), on met juste à jour le statut pour ne pas bloquer.
+      // (erreur de Foreign Key "23503"), on met juste à jour le statut pour ne pas bloquer le jury.
       if (error && error.code === '23503') {
         const retry = await supabase
           .from('citoyens')
           .update({
-            statut_demande: 'EN_ATTENTE'
+            statut_demande: 'EN_ATTENTE',
+            taille: formData.taille,
+            profession: formData.profession,
+            domicile: formData.domicile,
+            signes_particuliers: formData.signes_particuliers,
+            region: formData.region,
+            prefecture: formData.prefecture,
+            commune: formData.commune,
+            quartier: formData.quartier,
+            secteur: formData.secteur
           })
           .eq('id', user.id);
         error = retry.error;
+      } else if (!error) {
+         // Also update the extra fields on success
+         await supabase
+          .from('citoyens')
+          .update({
+            taille: formData.taille,
+            region: formData.region,
+            prefecture: formData.prefecture,
+            commune: formData.commune,
+            quartier: formData.quartier,
+            secteur: formData.secteur,
+            profession: formData.profession,
+            domicile: formData.domicile,
+            signes_particuliers: formData.signes_particuliers
+          })
+          .eq('id', user.id);
       }
 
       if (error) {
@@ -123,7 +173,7 @@ const DemandForm = () => {
         return;
       }
 
-      navigate('/traitement', { state: { num_acte: formData.num_acte, documentType: formData.type_document } });
+      navigate('/traitement', { state: { num_acte: formData.num_acte, type_document: formData.type_document } });
     } catch (err) {
       setSubmitError('Une erreur inattendue est survenue lors de la soumission.');
       setIsSubmitting(false);
@@ -146,12 +196,13 @@ const DemandForm = () => {
             <h2 className="page-title">Formulaire de demande de titre</h2>
             <p className="page-subtitle">
               Étape {currentStep} sur 3 : {
-                currentStep === 1 ? `Informations pour votre ${getDocumentTypeLabel(formData.type_document)}` : 
+                currentStep === 1 ? "Informations personnelles" : 
                 currentStep === 2 ? "Dépôt des justificatifs" : 
                 "Paiement et Prise de Rendez-vous"
               }
             </p>
           </div>
+
           <div className="form-grid animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <div className="form-sections">
               
@@ -160,8 +211,44 @@ const DemandForm = () => {
                 <div className="step-content animate-fade-in">
                   <section className="form-card">
                     <div className="section-header-form">
-                      <div className="icon-badge"><Info size={18} /></div>
-                      <h3>Identité Personnelle & Contact</h3>
+                      <div className="icon-badge"><FileText size={18} /></div>
+                      <h3>Type de Document & Identité</h3>
+                    </div>
+
+                    <div className="input-field full" style={{ marginBottom: '32px' }}>
+                      <label style={{ color: '#006D44', fontWeight: '800', letterSpacing: '0.5px' }}>CHOISISSEZ LE TITRE À ÉMETTRE</label>
+                      <div className="custom-select-wrapper" style={{ position: 'relative' }}>
+                        <select 
+                          value={formData.type_document} 
+                          onChange={(e) => setFormData({...formData, type_document: e.target.value})}
+                          className="document-selector-fancy"
+                          style={{ 
+                            width: '100%',
+                            padding: '16px 20px',
+                            fontSize: '16px',
+                            fontWeight: '700',
+                            color: '#1A1A1A',
+                            backgroundColor: '#F0F9F5',
+                            border: '2px solid #006D44',
+                            borderRadius: '12px',
+                            appearance: 'none',
+                            cursor: 'pointer',
+                            transition: 'all 0.2s',
+                            boxShadow: '0 4px 12px rgba(0, 109, 68, 0.08)'
+                          }}
+                        >
+                          <option value="Carte d'Identité">🪪 Carte d'Identité Nationale Biométrique</option>
+                          <option value="Passeport">Passport Biométrique (OACI)</option>
+                          <option value="Extrait de Naissance">📜 Extrait de Naissance (Digitalisation)</option>
+                          <option value="Permis de Conduire">🚗 Permis de Conduire Sécurisé</option>
+                          <option value="Carte Grise">📑 Carte Grise (Immatriculation)</option>
+                          <option value="Casier Judiciaire">⚖️ Casier Judiciaire (Bulletin N°3)</option>
+                          <option value="Certificat de Nationalité">🇬🇳 Certificat de Nationalité Guinéenne</option>
+                        </select>
+                        <div style={{ position: 'absolute', right: '20px', top: '50%', transform: 'translateY(-50%)', pointerEvents: 'none', color: '#006D44' }}>
+                          <ChevronRight size={20} style={{ transform: 'rotate(90deg)' }} />
+                        </div>
+                      </div>
                     </div>
                     
                     <div className="input-group-row">
@@ -199,6 +286,22 @@ const DemandForm = () => {
                         </select>
                       </div>
                       <div className="input-field">
+                        <label>TAILLE (en m)</label>
+                        <input 
+                          type="text" 
+                          placeholder="Ex: 1.64" 
+                          value={formData.taille || ''}
+                          onChange={(e) => setFormData({...formData, taille: e.target.value})}
+                        />
+                      </div>
+                    </div>
+
+                    <div className="input-group-row" style={{ marginTop: '24px' }}>
+                      <div className="input-field">
+                        <label>PROFESSION / FONCTION</label>
+                        <input type="text" placeholder="Ex: Administrateur Civil" value={formData.profession || ''} onChange={(e) => setFormData({...formData, profession: e.target.value})} />
+                      </div>
+                      <div className="input-field">
                         <label>NUMÉRO DE TÉLÉPHONE</label>
                         <input 
                           type="tel" 
@@ -213,22 +316,63 @@ const DemandForm = () => {
                   <section className="form-card" style={{ marginTop: '24px' }}>
                     <div className="section-header-form">
                       <div className="icon-badge"><Info size={18} /></div>
-                      <h3>Informations Légales & Filiation</h3>
+                      <h3>Résidence & Signalement</h3>
                     </div>
 
-                    <div className="input-field full">
-                      <label>TYPE DE DOCUMENT</label>
-                      <select
-                        value={formData.type_document}
-                        onChange={(e) => setFormData({ ...formData, type_document: e.target.value })}
-                      >
-                        {DOCUMENT_TYPE_OPTIONS.map((option) => (
-                          <option key={option.value} value={option.value}>{option.label}</option>
-                        ))}
-                      </select>
+                    <div className="input-field full" style={{ marginBottom: '24px' }}>
+                      <label>ADRESSE DE DOMICILE COMPLÈTE</label>
+                      <input type="text" placeholder="Ex: Nongo Unité 1, Commune de Ratoma, Conakry" value={formData.domicile || ''} onChange={(e) => setFormData({...formData, domicile: e.target.value})} />
                     </div>
                     
-                    <div className="input-group-row" style={{ marginTop: '20px' }}>
+                    <div className="input-field full">
+                      <label>SIGNES PARTICULIERS</label>
+                      <input type="text" placeholder="Ex: Néant" value={formData.signes_particuliers || ''} onChange={(e) => setFormData({...formData, signes_particuliers: e.target.value})} />
+                    </div>
+                  </section>
+
+                  <section className="form-card" style={{ marginTop: '24px' }}>
+                    <div className="section-header-form">
+                      <div className="icon-badge"><Info size={18} /></div>
+                      <h3>Origine & Localisation</h3>
+                    </div>
+                    
+                    <div className="input-group-row">
+                      <div className="input-field">
+                        <label>RÉGION</label>
+                        <input type="text" placeholder="Ex: CONAKRY" value={formData.region || ''} onChange={(e) => setFormData({...formData, region: e.target.value})} />
+                      </div>
+                      <div className="input-field">
+                        <label>PRÉFECTURE</label>
+                        <input type="text" placeholder="Ex: CONAKRY" value={formData.prefecture || ''} onChange={(e) => setFormData({...formData, prefecture: e.target.value})} />
+                      </div>
+                    </div>
+
+                    <div className="input-group-row" style={{ marginTop: '24px' }}>
+                      <div className="input-field">
+                        <label>SOUS-PRÉFECTURE / COMMUNE</label>
+                        <input type="text" placeholder="Ex: MATOTO" value={formData.commune || ''} onChange={(e) => setFormData({...formData, commune: e.target.value})} />
+                      </div>
+                      <div className="input-field">
+                        <label>QUARTIER / DISTRICT</label>
+                        <input type="text" placeholder="Ex: GBESSIA CENTRE" value={formData.quartier || ''} onChange={(e) => setFormData({...formData, quartier: e.target.value})} />
+                      </div>
+                    </div>
+
+                    <div className="input-group-row" style={{ marginTop: '24px' }}>
+                      <div className="input-field">
+                        <label>SECTEUR / VILLAGE</label>
+                        <input type="text" placeholder="Ex: 02" value={formData.secteur || ''} onChange={(e) => setFormData({...formData, secteur: e.target.value})} />
+                      </div>
+                    </div>
+                  </section>
+
+                  <section className="form-card" style={{ marginTop: '24px' }}>
+                    <div className="section-header-form">
+                      <div className="icon-badge"><Info size={18} /></div>
+                      <h3>Filiation & Acte de Naissance</h3>
+                    </div>
+                    
+                    <div className="input-group-row">
                       <div className="input-field">
                         <label>NOM COMPLET DU PÈRE</label>
                         <input type="text" placeholder="Ex: Mamadou Diallo" value={formData.nom_pere} onChange={(e) => setFormData({...formData, nom_pere: e.target.value})} />
@@ -330,7 +474,7 @@ const DemandForm = () => {
                     
                     <div style={{ backgroundColor: '#F8F9FA', padding: '24px', borderRadius: '16px', marginBottom: '24px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                       <div>
-                        <p style={{ fontWeight: '700', fontSize: '16px', marginBottom: '4px' }}>{getDocumentTypeLabel(formData.type_document)}</p>
+                        <p style={{ fontWeight: '700', fontSize: '16px', marginBottom: '4px' }}>{formData.type_document}</p>
                         <p style={{ fontSize: '13px', color: '#868E96' }}>Frais d'émission officiels</p>
                       </div>
                       <div style={{ fontSize: '24px', fontWeight: '800', color: '#006D44' }}>
@@ -403,7 +547,7 @@ const DemandForm = () => {
                 <div className="id-card-mock">
                   <img src="https://via.placeholder.com/280x180/006D44/FFFFFF?text=Specimen+CNI" alt="CNI Preview" />
                 </div>
-                <h4 className="preview-title">Spécimen {getDocumentTypeLabel(formData.type_document)} Biométrique</h4>
+                <h4 className="preview-title">Spécimen CNI Biométrique</h4>
               </div>
             </aside>
           </div>
