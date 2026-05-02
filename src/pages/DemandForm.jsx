@@ -20,12 +20,33 @@ const DemandForm = () => {
     type_document: selectedDocumentType,
     nom: user?.nom || '',
     prenom: user?.prenom || '',
-    date_naissance: '',
-    lieu_naissance: '',
-    nom_pere: '',
-    nom_mere: '',
-    num_acte: ''
+    date_naissance: user?.date_naissance || '',
+    lieu_naissance: user?.lieu_naissance || '',
+    genre: user?.genre || '',
+    telephone: user?.telephone || '',
+    nom_pere: user?.nom_pere || '',
+    nom_mere: user?.nom_mere || '',
+    num_acte: user?.id_acte_lie || ''
   });
+
+  // Mise à jour du formulaire dès que les données utilisateur sont disponibles (après sync)
+  useEffect(() => {
+    if (user) {
+      setFormData(prev => ({
+        ...prev,
+        nom: user.nom || prev.nom,
+        prenom: user.prenom || prev.prenom,
+        date_naissance: user.date_naissance || prev.date_naissance,
+        lieu_naissance: user.lieu_naissance || prev.lieu_naissance,
+        genre: user.genre || prev.genre,
+        telephone: user.telephone || prev.telephone,
+        nom_pere: user.nom_pere || prev.nom_pere,
+        nom_mere: user.nom_mere || prev.nom_mere,
+        num_acte: user.id_acte_lie || prev.num_acte
+      }));
+    }
+  }, [user]);
+
   const [verificationStatus, setVerificationStatus] = useState('idle');
 
   // Step 2 State (Mock Uploads)

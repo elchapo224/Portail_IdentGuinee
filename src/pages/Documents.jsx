@@ -20,9 +20,9 @@ const Documents = () => {
       const { data } = await supabase
         .from('documents_certifies')
         .select('id, id_acte, statut, created_at, date_generation, pdf_url, qr_code_url, hash_document')
-        .eq('citoyen_id', user.id)
-        .in('statut', ['GENERE', 'Généré', 'GÉNÉRÉ'])
-        .order('date_generation', { ascending: false });
+        .eq('citoyen_id', parseInt(user.id))
+        .eq('statut', 'GENERE')
+        .order('created_at', { ascending: false });
 
       setDocuments(data || []);
     };

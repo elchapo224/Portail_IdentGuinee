@@ -1,12 +1,136 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { ChevronRight, Share2, Download, Shield, Info, CheckCircle, Smartphone } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
+import { useLocation } from 'react-router-dom';
 import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
+import { supabase } from '../lib/supabase';
 import './DocumentGenere.css';
 
 const DocumentGenere = () => {
   const { user } = useAuth();
+  const location = useLocation();
+  const documentId = location.state?.documentId;
+
+  const [docData, setDocData] = useState(null);
+  const [citoyenData, setCitoyenData] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadData = async () => {
+      if (!user?.id) return;
+      
+      // Charger les détails du citoyen (pour la date et lieu de naissance)
+      const { data: citoyen } = await supabase
+        .from('citoyens')
+        .select('*')
+        .eq('id', user.id)
+        .single();
+      
+      setCitoyenData(citoyen);
+
+      // Charger le document généré (soit par ID transmis, soit le dernier généré)
+      let docQuery = supabase.from('documents_certifies').select('*').eq('citoyen_id', user.id);
+      
+      if (documentId) {
+        docQuery = docQuery.eq('id', documentId);
+      } else {
+        docQuery = docQuery.order('date_generation', { ascending: false }).limit(1);
+      }
+
+      const { data: docs } = await docQuery;
+      
+      if (docs && docs.length > 0) {
+        setDocData(docs[0]);
+      }
+      
+      setLoading(false);
+    };
+
+    loadData();
+  }, [user?.id, documentId]);
+
+  const formatDate = (dateString) => {
+    if (!dateString) return 'Aujourd\'hui';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  };
+
+  const formatDateTime = (dateString) => {
+    if (!dateString) return 'À l\'instant';
+    const date = new Date(dateString);
+    return date.toLocaleDateString('fr-FR', { day: 'long', month: 'long', year: 'numeric' }) + ' à ' + date.toLocaleTimeString('fr-FR');
+  };
+
+  if (loading) {
+    return (
+      <div className="layout-wrapper">
+        <Sidebar />
+        <main className="main-content">
+          <Header />
+          <div style={{ padding: '40px', textAlign: 'center' }}>Chargement du document...</div>
+        </main>
+      </div>
+    );
+  }
+
+  const handleDownloadPDF = async () => {
+    const element = document.getElementById('official-doc-container');
+    if (!element || !window.html2canvas || !window.jspdf) {
+      alert("Préparation du moteur PDF... Réessayez dans une seconde.");
+      return;
+    }
+
+    try {
+      const canvas = await window.html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+      
+      const imgData = canvas.toDataURL('image/png');
+      const { jsPDF } = window.jspdf;
+      
+      // Calcul des dimensions en mm (1px approx 0.264583mm)
+      const imgWidth = canvas.width * 0.264583 / 2; // /2 car scale=2
+      const imgHeight = canvas.height * 0.264583 / 2;
+      
+      const pdf = new jsPDF({
+        orientation: imgWidth > imgHeight ? 'landscape' : 'portrait',
+        unit: 'mm',
+        format: [imgWidth, imgHeight]
+      });
+      
+      pdf.addImage(imgData, 'PNG', 0, 0, imgWidth, imgHeight);
+      pdf.save(`IdentiGuinee_${user?.nom || 'Document'}.pdf`);
+    } catch (err) {
+      console.error("PDF Download error:", err);
+    }
+  };
+
+  const handleDownloadPNG = async () => {
+    const element = document.getElementById('official-doc-container');
+    if (!element || !window.html2canvas) {
+      alert("La capture d'image n'est pas encore prête. Veuillez réessayer dans un instant.");
+      return;
+    }
+    
+    try {
+      const canvas = await window.html2canvas(element, {
+        scale: 2,
+        useCORS: true,
+        backgroundColor: '#ffffff'
+      });
+      
+      const image = canvas.toDataURL("image/png");
+      const link = document.createElement('a');
+      link.href = image;
+      link.download = `IdentiGuinee_${user?.nom || 'Document'}.png`;
+      link.click();
+    } catch (err) {
+      console.error("PNG Download error:", err);
+    }
+  };
 
   return (
     <div className="layout-wrapper">
@@ -25,14 +149,18 @@ const DocumentGenere = () => {
               <p className="doc-subtitle">Document officiel généré et sécurisé par les services de l'État.</p>
             </div>
             <div className="doc-header-actions">
-              <button className="btn-secondary"><Share2 size={18} /> Partager</button>
-              <button className="btn-primary-doc"><Download size={18} /> Télécharger le document</button>
+              <button className="btn-secondary" onClick={handleDownloadPNG}>
+                <Smartphone size={18} /> Télécharger (PNG)
+              </button>
+              <button className="btn-primary-doc" onClick={handleDownloadPDF}>
+                <Download size={18} /> Télécharger (PDF)
+              </button>
             </div>
           </div>
 
           <div className="doc-grid animate-slide-up" style={{ animationDelay: '0.2s' }}>
             {/* Colonne Principale - Le Document */}
-            <div className="document-container">
+            <div className="document-container" id="official-doc-container">
               <div className="official-document">
                 <div className="doc-top-bar"></div>
                 
@@ -46,7 +174,7 @@ const DocumentGenere = () => {
                   </div>
                   <div className="republic-right">
                     <h3 className="card-type">CARTE NATIONALE D'IDENTITÉ BIOMÉTRIQUE</h3>
-                    <p className="card-id">N° ID: {user?.matricule}</p>
+                    <p className="card-id">N° ID: {citoyenData?.id || user?.id}</p>
                   </div>
                 </div>
 
@@ -55,7 +183,7 @@ const DocumentGenere = () => {
                     <img src={user?.avatar} alt="Photo ID" className="id-photo" />
                     <div className="signature-area">
                       <p className="signature-label">SIGNATURE</p>
-                      <p className="signature-text">{user?.prenom.charAt(0)}. {user?.nom}</p>
+                      <p className="signature-text">{user?.prenom?.charAt(0)}. {user?.nom}</p>
                     </div>
                   </div>
                   
@@ -71,7 +199,7 @@ const DocumentGenere = () => {
                     <div className="info-row-2">
                       <div className="info-group">
                         <label>SEXE / SEX</label>
-                        <p className="info-val">F</p>
+                        <p className="info-val">{citoyenData?.genre || 'M/F'}</p>
                       </div>
                       <div className="info-group">
                         <label>TAILLE / HEIGHT</label>
@@ -80,17 +208,17 @@ const DocumentGenere = () => {
                     </div>
                     <div className="info-group">
                       <label>DATE & LIEU DE NAISSANCE / DATE & PLACE OF BIRTH</label>
-                      <p className="info-val">12.05.1992 - Conakry</p>
+                      <p className="info-val">{formatDate(citoyenData?.date_naissance)} - {citoyenData?.lieu_naissance || 'Guinée'}</p>
                     </div>
                     <div className="info-group">
                       <label>DATE D'ÉMISSION / DATE OF ISSUE</label>
-                      <p className="info-val">24.10.2023</p>
+                      <p className="info-val">{formatDate(docData?.date_generation || docData?.created_at)}</p>
                     </div>
                   </div>
 
                   <div className="doc-qr-col">
                     <div className="qr-wrapper">
-                      <img src="https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=GN-ID-VALIDATION-CHAIN" alt="QR Code" />
+                      <img src={`https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${docData?.id_acte || 'GN-ID-VALIDATION'}`} alt="QR Code" />
                     </div>
                     <div className="blockchain-badge">
                       <Shield size={12} /> VÉRIFIÉ BLOCKCHAIN
@@ -107,7 +235,7 @@ const DocumentGenere = () => {
                     </div>
                   </div>
                   <div className="generation-timestamp">
-                    Généré le 24 Octobre 2026 à 14:32:01
+                    Généré le {formatDateTime(docData?.date_generation || docData?.created_at)}
                   </div>
                 </div>
               </div>

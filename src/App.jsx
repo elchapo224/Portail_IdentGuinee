@@ -8,6 +8,7 @@ import DocumentGenere from './pages/DocumentGenere'
 import Tracking from './pages/Tracking'
 import Documents from './pages/Documents'
 import Settings from './pages/Settings'
+import Services from './pages/Services'
 import './App.css'
 
 const PrivateRoute = ({ children }) => {
@@ -23,6 +24,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/" element={<PrivateRoute><Dashboard /></PrivateRoute>} />
           <Route path="/nouvelle-demande" element={<PrivateRoute><DemandForm /></PrivateRoute>} />
+          <Route path="/services" element={<PrivateRoute><Services /></PrivateRoute>} />
           <Route path="/traitement" element={<PrivateRoute><Processing /></PrivateRoute>} />
           <Route path="/document-genere" element={<PrivateRoute><DocumentGenere /></PrivateRoute>} />
           <Route path="/suivi" element={<PrivateRoute><Tracking /></PrivateRoute>} />

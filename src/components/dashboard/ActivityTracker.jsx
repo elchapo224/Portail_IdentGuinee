@@ -44,8 +44,8 @@ const ActivityTracker = () => {
       const { data } = await supabase
         .from('documents_certifies')
         .select('id, id_acte, statut_demande, statut, created_at, date_generation')
-        .eq('citoyen_id', user.id)
-        .order('date_generation', { ascending: false })
+        .eq('citoyen_id', parseInt(user.id))
+        .order('created_at', { ascending: false })
         .limit(5);
 
       const mappedActivities = (data || []).map((doc) => {
