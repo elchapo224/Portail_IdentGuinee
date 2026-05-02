@@ -6,6 +6,7 @@ import StatCard from '../components/dashboard/StatCard';
 import ServiceCard from '../components/dashboard/ServiceCard';
 import ActivityTracker from '../components/dashboard/ActivityTracker';
 import SupportCard from '../components/dashboard/SupportCard';
+import { DOCUMENT_TYPES } from '../lib/documentTypes';
 import './Dashboard.css';
 
 const Dashboard = () => {
@@ -43,31 +44,31 @@ const Dashboard = () => {
             <div className="services-grid">
               <ServiceCard 
                 iconType="identity"
-                title="Carte d'Identité"
-                documentType="Carte d'Identité"
-                description="Nouvelle génération avec puce électronique sécurisée."
-                note="À partir de 15,000 GNF"
+                title={DOCUMENT_TYPES.CNI.label}
+                documentType={DOCUMENT_TYPES.CNI.value}
+                description={DOCUMENT_TYPES.CNI.description}
+                note={DOCUMENT_TYPES.CNI.note}
               />
               <ServiceCard 
                 iconType="passport"
-                title="Passeport"
-                documentType="Passeport"
-                description="Document de voyage international conforme OACI."
-                note="À partir de 500,000 GNF"
+                title={DOCUMENT_TYPES.PASSEPORT.label}
+                documentType={DOCUMENT_TYPES.PASSEPORT.value}
+                description={DOCUMENT_TYPES.PASSEPORT.description}
+                note={DOCUMENT_TYPES.PASSEPORT.note}
               />
               <ServiceCard 
                 iconType="birth"
-                title="Extrait de Naissance"
-                documentType="Extrait de Naissance"
-                description="Digitalisation de l'acte de naissance authentique."
-                note="GRATUIT POUR -18 ANS"
+                title={DOCUMENT_TYPES.NAISSANCE.label}
+                documentType={DOCUMENT_TYPES.NAISSANCE.value}
+                description={DOCUMENT_TYPES.NAISSANCE.description}
+                note={DOCUMENT_TYPES.NAISSANCE.note}
               />
               <ServiceCard 
                 iconType="driver"
-                title="Permis de Conduire"
-                documentType="Permis de Conduire"
-                description="Renouvellement et duplication de titre sécurisé."
-                note="EXAMEN & DOSSIER"
+                title={DOCUMENT_TYPES.PERMIS.label}
+                documentType={DOCUMENT_TYPES.PERMIS.value}
+                description={DOCUMENT_TYPES.PERMIS.description}
+                note={DOCUMENT_TYPES.PERMIS.note}
               />
             </div>
           </section>

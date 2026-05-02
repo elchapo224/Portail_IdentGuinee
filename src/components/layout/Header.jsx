@@ -1,10 +1,14 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Search, Bell } from 'lucide-react';
 import { useAuth } from '../../context/AuthContext';
+import { useNotifications } from '../../context/NotificationContext';
 import './Header.css';
 
 const Header = () => {
   const { user } = useAuth();
+  const { unreadCount } = useNotifications();
+  const navigate = useNavigate();
   const avatarSrc = user?.avatar || `https://ui-avatars.com/api/?name=${user?.prenom || 'Citoyen'}+${user?.nom || ''}&background=006D44&color=fff`;
 
   return (
@@ -19,9 +23,18 @@ const Header = () => {
       </div>
 
       <div className="header-actions">
-        <button className="notification-btn">
+        <button
+          type="button"
+          className="notification-btn"
+          onClick={() => navigate('/notifications')}
+          aria-label="Ouvrir la page notifications"
+        >
           <Bell size={20} />
-          <span className="notification-badge"></span>
+          {unreadCount > 0 ? (
+            <span className="notification-badge">{unreadCount}</span>
+          ) : (
+            <span className="notification-badge" />
+          )}
         </button>
 
         <div className="user-full-profile">

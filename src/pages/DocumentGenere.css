@@ -72,199 +72,613 @@
   align-items: start;
 }
 
-/* Official Document Style */
-.official-document {
-  background-color: var(--white);
-  border-radius: 24px;
-  overflow: hidden;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.08);
-  position: relative;
-  /* Geometric background pattern simulation */
-  background-image: linear-gradient(135deg, rgba(231, 246, 240, 0.5) 25%, transparent 25%), 
-                    linear-gradient(225deg, rgba(231, 246, 240, 0.5) 25%, transparent 25%), 
-                    linear-gradient(45deg, rgba(231, 246, 240, 0.5) 25%, transparent 25%), 
-                    linear-gradient(315deg, rgba(231, 246, 240, 0.5) 25%, transparent 25%);
-  background-position: 10px 0, 10px 0, 0 0, 0 0;
-  background-size: 60px 60px;
-  background-repeat: repeat;
-  border: 1px solid #E7F6F0;
-}
-
-.doc-top-bar {
-  height: 12px;
+/* --- CARTE D'IDENTITÉ CEDEAO (OFFICIEL) --- */
+.ecowas-id-card {
   width: 100%;
-  background: linear-gradient(90deg, #CE1126 33.33%, #FCD116 33.33%, #FCD116 66.66%, #009460 66.66%);
+  max-width: 550px;
+  background-color: #fcfdf8;
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.1);
+  font-family: 'Arial', sans-serif;
+  border: 1px solid #d4d8c5;
+  margin: 0 auto;
 }
 
-.doc-republic-header {
+.card-background-overlay {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+  z-index: 0;
+  opacity: 0.1;
+  background: 
+    radial-gradient(circle at 20% 30%, #ce1126 0%, transparent 40%),
+    radial-gradient(circle at 80% 70%, #009460 0%, transparent 40%),
+    radial-gradient(circle at 50% 50%, #fcd116 0%, transparent 40%);
+}
+
+.guinea-map-watermark {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 45%;
+  height: 45%;
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/thumb/c/c2/Guinea_map.svg/1000px-Guinea_map.svg.png');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: center;
+  opacity: 0.12;
+}
+
+.ecowas-header {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  padding: 40px 48px 24px 48px;
+  align-items: center;
+  padding: 8px 14px;
+  background: linear-gradient(to bottom, #ffffff, #fcfdf8);
+  border-bottom: 1px solid #eee;
+  z-index: 1;
+  position: relative;
 }
 
-.republic-left {
+.ecowas-logo-container {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 6px;
+  background: white;
+  padding: 2px;
+  border-radius: 50%;
+  border: 1px solid #008000;
 }
 
-.armoiries-img {
-  width: 48px;
-  height: auto;
+.ecowas-logo {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
 }
 
-.rep-title {
-  font-size: 16px;
-  font-weight: 800;
-  color: #006D44;
-  letter-spacing: 1px;
+.cedeau-text {
+  display: none;
 }
 
-.rep-motto {
-  font-size: 9px;
-  font-weight: 700;
-  color: #CE1126;
-  letter-spacing: 2px;
-  margin-top: 4px;
-}
-
-.republic-right {
-  text-align: right;
-}
-
-.card-type {
-  font-size: 14px;
-  font-weight: 800;
-  color: #1A1A1A;
-  max-width: 200px;
-  margin-left: auto;
-  line-height: 1.3;
-}
-
-.card-id {
-  font-size: 11px;
-  font-weight: 600;
-  color: #868E96;
-  margin-top: 8px;
-  letter-spacing: 1px;
-}
-
-.doc-body {
-  display: flex;
-  padding: 0 48px 32px 48px;
-  gap: 32px;
-}
-
-.doc-photo-col {
-  width: 140px;
-  flex-shrink: 0;
-}
-
-.id-photo {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-  margin-bottom: 24px;
-}
-
-.signature-area {
+.ecowas-titles {
   text-align: center;
-  border-top: 1px dashed #CED4DA;
-  padding-top: 12px;
+  flex: 1;
 }
 
-.signature-label {
-  font-size: 9px;
-  font-weight: 700;
-  color: #ADB5BD;
-  margin-bottom: 4px;
+.rep-guinee-title {
+  color: #ee4d2d;
+  font-size: 14px;
+  font-weight: 900;
+  margin: 0;
+  letter-spacing: 0.5px;
 }
 
-.signature-text {
-  font-family: 'Brush Script MT', cursive, serif;
-  font-size: 24px;
-  color: #1A1A1A;
+.card-main-title {
+  color: #000;
+  font-size: 12px;
+  font-weight: 800;
+  margin: 0;
 }
 
-.doc-info-col {
+.card-sub-titles {
+  color: #333;
+  font-size: 6px;
+  font-weight: 600;
+  margin: 0;
+}
+
+.guinea-flag-container {
+  width: 35px;
+  height: 24px;
+}
+
+.guinea-flag {
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(to right, #ce1126 33.3%, #fcd116 33.3%, #fcd116 66.6%, #009460 66.6%);
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+
+.ecowas-body {
+  display: flex;
+  padding: 10px 14px;
+  gap: 12px;
+  position: relative;
+  z-index: 1;
+}
+
+.ecowas-left-col {
+  width: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.main-id-photo-wrapper {
+  width: 100%;
+  aspect-ratio: 3/4;
+  background: #eee;
+  border: 0.5px solid #ccc;
+  overflow: hidden;
+  border-radius: 3px;
+}
+
+.signature-container-id {
+  text-align: left;
+}
+
+.label-italic {
+  font-style: italic;
+  font-size: 7px;
+  color: #666;
+  margin-bottom: 2px;
+}
+
+.signature-graphic {
+  font-family: 'Brush Script MT', cursive;
+  font-size: 14px;
+  color: #1a1a1a;
+  border-bottom: 1px solid #ccc;
+  display: inline-block;
+  min-width: 60px;
+  padding-bottom: 1px;
+}
+
+.ecowas-middle-col {
   flex: 1;
   display: flex;
   flex-direction: column;
-  gap: 16px;
+  gap: 5px;
 }
 
-.info-row-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
+.data-field label {
+  font-size: 7px;
+  color: #555;
+  font-style: italic;
+  margin-bottom: 0px;
 }
 
-.info-group label {
-  display: block;
-  font-size: 9px;
-  font-weight: 700;
-  color: #868E96;
-  margin-bottom: 4px;
+.data-val {
+  font-size: 10px;
+  font-weight: 600;
+  color: #000;
+  margin: 0;
 }
 
-.info-val {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1A1A1A;
-}
-
-.info-val.uppercase {
+.bold-upper {
+  font-weight: 800;
   text-transform: uppercase;
+  font-size: 11px;
 }
 
-.doc-qr-col {
-  width: 120px;
+.data-val-large {
+  font-size: 12px;
+  font-weight: 900;
+  color: #333;
+  font-family: 'Courier New', Courier, monospace;
+  letter-spacing: 0.5px;
+}
+
+.ecowas-right-col {
+  width: 80px;
   display: flex;
   flex-direction: column;
+  justify-content: space-between;
   align-items: center;
-  gap: 16px;
 }
 
-.qr-wrapper {
-  background: white;
-  padding: 8px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.qr-wrapper img {
+.right-top-data {
   width: 100%;
-  height: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
 }
 
-.blockchain-badge {
-  background-color: #E7F6F0;
-  color: #006D44;
-  padding: 6px 12px;
-  border-radius: 100px;
-  font-size: 9px;
+.data-val-box {
+  background: #fff;
+  border: 0.5px solid #ddd;
+  padding: 2px 4px;
   font-weight: 800;
-  display: flex;
-  align-items: center;
-  gap: 4px;
+  display: inline-block;
+  border-radius: 2px;
+  font-size: 9px;
+}
+
+.ghost-photo-oval {
+  width: 45px;
+  height: 55px;
+  border-radius: 50% 50% 45% 45% / 60% 60% 40% 40%;
+  overflow: hidden;
+  border: 2px solid rgba(255, 255, 255, 0.8);
+  box-shadow: 0 0 5px rgba(0,0,0,0.1);
+  margin: 2px 0;
+  opacity: 0.25;
+}
+
+.qr-code-embedded {
+  background: white;
+  padding: 3px;
+  border-radius: 4px;
+  border: 0.5px solid #eee;
   text-align: center;
 }
 
-.doc-footer {
+.qr-code-embedded img {
+  width: 35px;
+  height: 35px;
+}
+
+.qr-label {
+  font-size: 5px;
+  font-weight: 900;
+  color: #059669;
+  margin-top: 1px;
+}
+
+.ecowas-footer-id {
+  padding: 6px 14px 12px 14px;
   display: flex;
   justify-content: space-between;
   align-items: flex-end;
-  padding: 24px 48px 32px 48px;
   border-top: 1px solid rgba(0,0,0,0.05);
 }
 
-.signature-stamp {
+.issuance-place label {
+  font-size: 6px;
+  font-style: italic;
+  color: #666;
+}
+
+.issuance-place p {
+  margin: 0;
+  font-weight: 800;
+  font-size: 9px;
+}
+
+.authority-signature {
+  text-align: right;
+}
+
+.auth-sig-img {
+  width: 50px;
+  height: 18px;
+  background-image: url('https://upload.wikimedia.org/wikipedia/commons/b/ba/Signature_of_A._N._Tupolev.svg');
+  background-size: contain;
+  background-repeat: no-repeat;
+  background-position: right;
+  opacity: 0.5;
+}
+
+.blockchain-security-badge {
+  font-size: 8px;
+  font-weight: 900;
+  color: #059669;
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 3px;
+  opacity: 0.7;
+}
+
+@media print {
+  .ecowas-id-card {
+    box-shadow: none;
+    border: 1px solid #ccc;
+  }
+}
+
+/* Birth Document - Official Style Refinement */
+.birth-document-card.official-style {
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  position: relative;
+  overflow: hidden;
+  padding: 10px;
+  background-image: radial-gradient(#f0f0f0 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.birth-document-border {
+  border: 15px solid transparent;
+  padding: 10px;
+  position: relative;
+  /* Complex decorative border simulation */
+  border-image: linear-gradient(45deg, #7b2cbf, #240046, #009460, #fcd116, #ce1126) 1;
+  background-clip: padding-box;
+}
+
+.birth-document-inner {
+  background: rgba(255, 255, 255, 0.9);
+  padding: 30px;
+  position: relative;
+  min-height: 1000px;
+  border: 1px solid #ddd;
+}
+
+.birth-official-header-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.header-top-left p, .header-top-right p {
+  font-size: 10px;
+  font-weight: 800;
+  margin: 2px 0;
+  color: #333;
+}
+
+.header-top-left .motto {
+  color: #ce1126;
+  font-size: 8px;
+  letter-spacing: 1px;
+}
+
+.armoiries-gold {
+  width: 70px;
+  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
+}
+
+.birth-main-title {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.birth-main-title h1 {
+  font-family: 'Playfair Display', 'Times New Roman', serif;
+  font-size: 32px;
+  font-weight: 700;
+  color: #1a1a1a;
+  margin: 0;
+}
+
+.subtitle-english {
+  font-size: 12px;
+  font-style: italic;
+  color: #666;
+  margin: 5px 0 15px;
+}
+
+.title-bold-large {
+  font-size: 24px;
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  font-weight: 800;
+  color: #000;
+  border-top: 2px solid #000;
+  border-bottom: 2px solid #000;
+  display: inline-block;
+  padding: 5px 40px;
+}
+
+.location-info-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+  margin-bottom: 30px;
+  border: 1px solid #000;
+}
+
+.location-box, .issuer-box {
+  padding: 10px;
+}
+
+.location-box {
+  border-right: 1px solid #000;
+}
+
+.location-row {
+  margin-bottom: 5px;
+}
+
+.location-row .label, .issuer-box .label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #444;
+  margin-right: 8px;
+}
+
+.location-row .value, .issuer-box .value {
+  font-size: 13px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+/* Sections & Tables */
+.birth-official-section {
+  margin-bottom: 20px;
+}
+
+.section-title-banner {
+  background: #eee;
+  border: 1px solid #000;
+  border-bottom: none;
+  font-size: 12px;
+  font-weight: 800;
+  text-align: center;
+  padding: 4px;
+  width: 150px;
+}
+
+.official-table {
+  border: 1px solid #000;
+}
+
+.table-row {
+  display: flex;
+  border-bottom: 1px solid #ccc;
+}
+
+.table-row:last-child {
+  border-bottom: none;
+}
+
+.table-row.split {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+}
+
+.row-part {
+  display: flex;
+}
+
+.row-part:first-child {
+  border-right: 1px solid #ccc;
+}
+
+.table-cell {
+  padding: 8px 12px;
+  font-size: 12px;
+}
+
+.label-cell {
+  width: 250px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #555;
+  border-right: 1px solid #eee;
+  background: #fafafa;
+}
+
+.value-cell {
+  flex: 1;
+  font-weight: 600;
+  color: #000;
+}
+
+.value-cell.bold {
+  font-weight: 800;
+  font-size: 14px;
+}
+
+.value-cell.uppercase {
+  text-transform: uppercase;
+}
+
+/* Footer & Seals */
+.birth-official-footer {
+  margin-top: 40px;
+  position: relative;
+}
+
+.footer-top-text {
+  text-align: center;
+  margin-bottom: 40px;
+  font-weight: 600;
+}
+
+.official-seals-container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0 40px;
+}
+
+.blue-stamp {
+  width: 120px;
+  height: 120px;
+  border: 4px double #1a4f8b;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 10px;
+  transform: rotate(-15deg);
+}
+
+.inner-stamp {
+  text-align: center;
+  font-size: 9px;
+  color: #1a4f8b;
+  font-weight: 800;
+  text-transform: uppercase;
+  border: 1px solid #1a4f8b;
+  border-radius: 50%;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.qr-official {
+  text-align: center;
+}
+
+.qr-official img {
+  width: 100px;
+  border: 1px solid #eee;
+  padding: 5px;
+  background: #fff;
+}
+
+.id-number {
+  font-family: monospace;
+  font-weight: 700;
+  margin-top: 8px;
+  font-size: 12px;
+}
+
+.red-jagged-seal {
+  width: 120px;
+  height: 120px;
+  background: #ce1126;
+  position: relative;
+  clip-path: polygon(
+    50% 0%, 61% 5%, 72% 0%, 80% 9%, 91% 9%, 91% 20%, 100% 28%, 95% 39%, 100% 50%, 95% 61%, 100% 72%, 91% 80%, 91% 91%, 80% 91%, 72% 100%, 61% 95%, 50% 100%, 39% 95%, 28% 100%, 20% 91%, 9% 91%, 9% 80%, 0% 72%, 5% 61%, 0% 50%, 5% 39%, 0% 28%, 9% 20%, 9% 9%, 20% 9%, 28% 0%, 39% 5%
+  );
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+}
+
+.seal-content {
+  color: #fff;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.seal-content span {
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.watermark-overlay {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0.03;
+  pointer-events: none;
+  width: 500px;
+}
+
+.watermark-overlay img {
+  width: 100%;
+}
+
+@media (max-width: 950px) {
+  .location-info-grid, .table-row.split {
+    grid-template-columns: 1fr;
+  }
+  
+  .official-seals-container {
+    flex-direction: column;
+    gap: 30px;
+  }
 }
 
 .stamp-label {

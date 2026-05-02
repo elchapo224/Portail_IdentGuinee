@@ -5,13 +5,14 @@ import Sidebar from '../components/layout/Sidebar';
 import Header from '../components/layout/Header';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
+import { DOCUMENT_TYPES, DOCUMENT_TYPE_OPTIONS, getDocumentTypeLabel } from '../lib/documentTypes';
 import './DemandForm.css';
 
 const DemandForm = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
-  const selectedDocumentType = location.state?.documentType || "Carte d'Identité";
+  const selectedDocumentType = location.state?.documentType || DOCUMENT_TYPES.CNI.value;
 
   const [formData, setFormData] = useState({
     type_document: selectedDocumentType,
@@ -105,7 +106,7 @@ const DemandForm = () => {
         })
         .eq('id', user.id);
 
-      navigate('/traitement', { state: { documentId: data.id } });
+      navigate('/traitement', { state: { documentId: data.id, documentType: formData.type_document } });
     } catch (err) {
       setSubmitError('Une erreur inattendue est survenue lors de la soumission.');
     } finally {
@@ -129,10 +130,9 @@ const DemandForm = () => {
           <div className="form-header animate-slide-up" style={{ animationDelay: '0.2s' }}>
             <h2 className="page-title">Formulaire de demande de titre</h2>
             <p className="page-subtitle">
-              Veuillez vérifier vos informations pré-remplies et compléter les champs manquants pour initier votre demande de Carte Nationale d'Identité Biométrique.
+              Veuillez vérifier vos informations pré-remplies et compléter les champs manquants pour initier votre demande de {getDocumentTypeLabel(formData.type_document)}.
             </p>
           </div>
-
           <div className="form-grid animate-slide-up" style={{ animationDelay: '0.3s' }}>
             <div className="form-sections">
               {/* Section Identité */}
@@ -197,10 +197,9 @@ const DemandForm = () => {
                     value={formData.type_document}
                     onChange={(e) => setFormData({ ...formData, type_document: e.target.value })}
                   >
-                    <option value="Carte d'Identité">Carte d'Identité</option>
-                    <option value="Passeport">Passeport</option>
-                    <option value="Extrait de Naissance">Extrait de Naissance</option>
-                    <option value="Permis de Conduire">Permis de Conduire</option>
+                    {DOCUMENT_TYPE_OPTIONS.map((option) => (
+                      <option key={option.value} value={option.value}>{option.label}</option>
+                    ))}
                   </select>
                 </div>
                 <div className="input-field full">

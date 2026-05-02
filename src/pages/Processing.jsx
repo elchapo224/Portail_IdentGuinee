@@ -10,6 +10,7 @@ const Processing = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const documentId = location.state?.documentId;
+  const documentType = location.state?.documentType;
   const [step, setStep] = useState(1);
   const [progress, setProgress] = useState(0);
 
@@ -35,7 +36,7 @@ const Processing = () => {
           .update({ statut_demande: 'TERMINEE', statut: 'GENERE' })
           .eq('id', documentId);
       }
-      navigate('/document-genere');
+      navigate('/document-genere', { state: { documentType } });
     }, 5000);
 
     return () => {
