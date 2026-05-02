@@ -1,0 +1,77 @@
+.activity-tracker {
+  background-color: var(--white);
+  padding: 32px;
+  border-radius: 32px;
+  box-shadow: var(--card-shadow);
+}
+
+.section-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin-bottom: 24px;
+  color: #1A1A1A;
+}
+
+.activity-list {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.activity-item {
+  display: flex;
+  align-items: center;
+  padding: 16px 20px;
+  background-color: #F8F9FA;
+  border-radius: 16px;
+  gap: 16px;
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-dot.progress { background-color: #40C057; }
+.status-dot.action { background-color: #FA5252; }
+.status-dot.archived { background-color: #CED4DA; }
+
+.activity-details {
+  flex-grow: 1;
+}
+
+.activity-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: #1A1A1A;
+  margin-bottom: 4px;
+}
+
+.activity-meta {
+  font-size: 12px;
+  color: var(--text-muted);
+}
+
+.activity-badge {
+  padding: 6px 12px;
+  border-radius: 100px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+}
+
+.activity-badge.progress {
+  background-color: #E7F6F0;
+  color: var(--primary);
+}
+
+.activity-badge.action {
+  background-color: #FFF5F5;
+  color: #FA5252;
+}
+
+.activity-badge.archived {
+  background-color: #F1F3F5;
+  color: #868E96;
+}

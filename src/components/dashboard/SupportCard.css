@@ -1,0 +1,63 @@
+.support-card {
+  background-color: #2D3E33;
+  padding: 40px;
+  border-radius: 32px;
+  color: var(--white);
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  height: 100%;
+}
+
+.support-title {
+  font-size: 24px;
+  font-weight: 700;
+}
+
+.support-desc {
+  font-size: 14px;
+  color: rgba(255, 255, 255, 0.7);
+  line-height: 1.6;
+}
+
+.support-status-box {
+  background-color: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  padding: 20px;
+  border-radius: 16px;
+  margin: 10px 0;
+}
+
+.status-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: #40C057;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+
+.status-text {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.9);
+  line-height: 1.5;
+}
+
+.chat-button {
+  width: 100%;
+  padding: 16px;
+  background-color: #006D44;
+  color: var(--white);
+  border-radius: 100px;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  transition: all 0.2s ease;
+  margin-top: auto;
+}
+
+.chat-button:hover {
+  background-color: #008552;
+  transform: translateY(-2px);
+}
