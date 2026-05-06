@@ -9,7 +9,7 @@ Ce projet est une preuve de concept (PoC) visant à moderniser et sécuriser l'�
 
 ---
 
-## 💡 La logique de l'application
+##  La logique de l'application
 
 Le but d'IdentiGuinée est de rendre les démarches administratives simples, rapides et transparentes pour les citoyens guinéens. Voici le parcours de notre démo :
 
@@ -33,7 +33,7 @@ Bien que simulé ici techniquement via Supabase pour les besoins de rapidité du
 
 ---
 
-## 🚀 Démarrer le projet en local
+##  Démarrer le projet en local
 
 Pour tester l'application sur votre machine (parfait pour la démo live), suivez ces étapes simples :
 
