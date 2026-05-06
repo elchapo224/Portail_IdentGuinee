@@ -126,9 +126,8 @@ const Settings = () => {
       return;
     }
 
-    // Pour l'avatar (qui n'existe pas en base de données), on utilise le Base64
+    // Pour l'avatar, on utilise le Base64 calculé plus haut
     // stocké localement via le AuthContext pour la démo.
-    const finalAvatar = selectedAvatarFile || avatarPreview || generateFallbackAvatar(formData.prenom, formData.nom);
 
     // Attention: AuthContext expose "login" pour mettre à jour l'état local
     const login = (userData) => {
