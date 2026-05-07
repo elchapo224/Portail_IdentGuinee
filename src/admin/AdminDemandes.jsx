@@ -287,30 +287,7 @@ const AdminDemandes = () => {
           .order('created_at', { ascending: false })
           .limit(50);
 
-<<<<<<< HEAD
         if (error || !docs || docs.length === 0) {
-=======
-        if (docs && docs.length > 0) {
-          const mapped = docs.map((d, i) => {
-            // Statut simulé réaliste basé sur hash_blockchain
-            let statut = 'valide';
-            if (!d.hash_blockchain) statut = 'en_cours';
-            else if (i % 7 === 3) statut = 'rejete';
-            const bg = statut === 'valide' ? '006D44' : statut === 'rejete' ? 'CE1126' : 'FCD116';
-            const tc = statut === 'en_cours' ? '333' : 'fff';
-            return {
-              id: d.id,
-              nom: `${d.prenom} ${d.nom}`,
-              lieu: d.lieu_naissance || 'Guinée',
-              statut,
-              id_doc: d.id_acte || `GN-${i + 100}`,
-              hash: d.hash_blockchain,
-              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(d.prenom + '+' + d.nom)}&background=${bg}&color=${tc}`,
-            };
-          });
-          setDemandes(mapped);
-        } else {
->>>>>>> 2a12286663ce39f4e6defbebfd614f86301cdc1a
           setDemandes(FALLBACK);
           return;
         }
