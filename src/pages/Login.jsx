@@ -41,24 +41,28 @@ const Login = () => {
   useEffect(() => {
     const fetchStats = async () => {
       try {
-        const [{ count: nbCitoyens }, { count: nbDocs }] = await Promise.all([
+        // Stats réelles depuis les 3 tables
+        const [
+          { count: nbCitoyens },
+          { count: nbActes },
+          { count: nbDocsGeneres },
+          { count: nbVerifies }
+        ] = await Promise.all([
           supabase.from('citoyens').select('*', { count: 'exact', head: true }),
           supabase.from('naissancechain').select('*', { count: 'exact', head: true }),
+          supabase.from('documents_certifies').select('*', { count: 'exact', head: true }).eq('statut', 'GENERE'),
+          supabase.from('naissancechain').select('*', { count: 'exact', head: true }).not('hash_blockchain', 'is', null),
         ]);
 
-        // Taux de vérification : actes avec hash_blockchain non nul / total
-        const { count: nbVerifies } = await supabase
-          .from('naissancechain')
-          .select('*', { count: 'exact', head: true })
-          .not('hash_blockchain', 'is', null);
-
-        const total = nbDocs || 1;
-        const taux = total > 0 ? Math.round(((nbVerifies || 0) / total) * 1000) / 10 : 99.8;
+        const totalActes = nbActes || 1;
+        const taux = totalActes > 0
+          ? Math.round(((nbVerifies || 0) / totalActes) * 1000) / 10
+          : 0;
 
         setStats({
           citoyens:  (nbCitoyens || 0).toLocaleString('fr-FR'),
-          documents: ((nbDocs || 0) + 98400).toLocaleString('fr-FR'), // base réelle + données historiques
-          tauxVerif: `${taux > 0 ? taux : 99.8}%`,
+          documents: (nbDocsGeneres || 0).toLocaleString('fr-FR'),
+          tauxVerif: `${taux > 0 ? taux : 0}%`,
         });
       } catch {
         setStats({ citoyens: '12 847', documents: '98 400+', tauxVerif: '99.8%' });

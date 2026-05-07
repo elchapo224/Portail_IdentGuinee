@@ -92,23 +92,7 @@ img { max-width: 100%; }
   z-index: 99;
 }
 
-/* ── Burger btn (mobile) ── */
-.sidebar-burger {
-  display: none;
-  position: fixed;
-  top: 16px;
-  left: 16px;
-  z-index: 200;
-  width: 42px;
-  height: 42px;
-  background: var(--primary);
-  border-radius: 10px;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  border: none;
-  box-shadow: var(--shadow-md);
-}
+/* Burger géré via Header.jsx → .header-burger */
 
 /* ════════════════════════════════════
    RESPONSIVE BREAKPOINTS
@@ -122,7 +106,6 @@ img { max-width: 100%; }
 
 /* Mobile (≤ 768px) */
 @media (max-width: 768px) {
-  .sidebar-burger { display: flex; }
   .sidebar-overlay.open { display: block; }
 
   .sidebar {

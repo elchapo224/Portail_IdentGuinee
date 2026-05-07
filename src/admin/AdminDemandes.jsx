@@ -281,34 +281,70 @@ const AdminDemandes = () => {
   useEffect(() => {
     const fetchDemandes = async () => {
       try {
-        const { data: docs } = await supabase
-          .from('naissancechain')
-          .select('id, id_acte, nom, prenom, lieu_naissance, hash_blockchain')
+        // Récupérer les demandes réelles depuis documents_certifies
+        const { data: docs, error } = await supabase
+          .from('documents_certifies')
+          .select('id, citoyen_id, id_acte, statut, statut_demande, created_at, date_generation')
           .order('created_at', { ascending: false })
-          .limit(20);
+          .limit(50);
 
-        if (docs && docs.length > 0) {
-          const mapped = docs.map((d, i) => {
-            // Statut simulé réaliste basé sur hash_blockchain
-            let statut = 'valide';
-            if (!d.hash_blockchain) statut = 'en_cours';
-            else if (i % 7 === 3) statut = 'rejete';
-            const bg = statut === 'valide' ? '006D44' : statut === 'rejete' ? 'CE1126' : 'FCD116';
-            const tc = statut === 'en_cours' ? '333' : 'fff';
-            return {
-              id: d.id,
-              nom: `${d.prenom} ${d.nom}`,
-              lieu: d.lieu_naissance || 'Guinée',
-              statut,
-              id_doc: d.id_acte || `GN-${i + 100}`,
-              avatar: `https://ui-avatars.com/api/?name=${encodeURIComponent(d.prenom + '+' + d.nom)}&background=${bg}&color=${tc}`,
-            };
-          });
-          setDemandes(mapped);
-        } else {
+        if (error || !docs || docs.length === 0) {
           setDemandes(FALLBACK);
+          return;
         }
-      } catch { setDemandes(FALLBACK); }
+
+        // Pour chaque document, récupérer le citoyen + l'acte NaissanceChain
+        const enriched = await Promise.all(docs.map(async (doc) => {
+          let nom = 'Citoyen', lieu = 'Guinée', avatar = '';
+
+          // Récupérer le citoyen
+          if (doc.citoyen_id) {
+            const { data: cit } = await supabase
+              .from('citoyens')
+              .select('nom, prenom, lieu_naissance, region')
+              .eq('id', doc.citoyen_id)
+              .maybeSingle();
+            if (cit) {
+              nom = `${cit.prenom || ''} ${cit.nom || ''}`.trim() || 'Citoyen';
+              lieu = cit.lieu_naissance || cit.region || 'Guinée';
+              avatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(nom)}&background=006D44&color=fff`;
+            }
+          }
+
+          // Déduire le type de document depuis statut_demande
+          const raw = doc.statut_demande || '';
+          const code = raw.includes(':') ? raw.split(':')[0] : 'A';
+          const typeMap = { P:'Passeport', C:"Carte d'Identité", A:'Acte de Naissance', E:'Extrait de Naissance', D:'Permis de Conduire', N:'Cert. Nationalité' };
+          const typeDoc = typeMap[code] || 'Document Officiel';
+
+          // Statut réel
+          const s = (doc.statut || '').toUpperCase();
+          const sd = (raw.includes(':') ? raw.split(':')[1] : raw).toUpperCase();
+          let statut = 'en_cours';
+          if (['GENERE','GÉNÉRÉ','VALIDE','VALIDATED','TERMINEE','TERMINÉE'].some(v => s === v || sd === v)) statut = 'valide';
+          else if (s === 'REJETE' || s === 'REJECTED') statut = 'rejete';
+
+          const dateFormatted = doc.date_generation || doc.created_at
+            ? new Date(doc.date_generation || doc.created_at).toLocaleDateString('fr-FR', { day:'2-digit', month:'short', year:'numeric' })
+            : '—';
+
+          return {
+            id: doc.id,
+            nom,
+            lieu,
+            statut,
+            id_doc: doc.id_acte || '—',
+            type_doc: typeDoc,
+            date: dateFormatted,
+            avatar: avatar || `https://ui-avatars.com/api/?name=Citoyen&background=006D44&color=fff`,
+          };
+        }));
+
+        setDemandes(enriched);
+      } catch (err) {
+        console.error('Erreur chargement demandes admin:', err);
+        setDemandes(FALLBACK);
+      }
     };
     fetchDemandes();
   }, []);
@@ -330,7 +366,7 @@ const AdminDemandes = () => {
         <table style={{ width: '100%', borderCollapse: 'collapse' }}>
           <thead>
             <tr style={{ background: '#f9fafb', borderBottom: '1px solid #f0f0f0' }}>
-              {['Citoyen', 'Lieu', 'ID Document', 'Statut', 'Action'].map(h => (
+              {['Citoyen', 'Lieu', 'Type', 'Réf. Acte', 'Date', 'Statut', 'Action'].map(h => (
                 <th key={h} style={{ padding: '14px 20px', textAlign: 'left', fontSize: 11, fontWeight: 700, color: '#aaa', letterSpacing: 0.8 }}>{h.toUpperCase()}</th>
               ))}
             </tr>
@@ -350,10 +386,12 @@ const AdminDemandes = () => {
                       <span style={{ fontWeight: 600, fontSize: 14, color: '#0a2e1a' }}>{d.nom}</span>
                     </div>
                   </td>
-                  <td style={{ padding: '16px 20px', fontSize: 13, color: '#666' }}>{d.lieu}</td>
-                  <td style={{ padding: '16px 20px', fontSize: 13, fontWeight: 600, fontFamily: 'monospace', color: '#0a2e1a' }}>
-                    {d.motif || d.id_doc}
+                  <td style={{ padding: '14px 16px', fontSize: 12, color: '#666' }}>{d.lieu}</td>
+                  <td style={{ padding: '14px 16px', fontSize: 12, fontWeight: 600, color: '#0a2e1a' }}>{d.type_doc || '—'}</td>
+                  <td style={{ padding: '14px 16px', fontSize: 11, fontFamily: 'monospace', color: 'var(--primary)', fontWeight: 600 }}>
+                    {d.id_doc}
                   </td>
+                  <td style={{ padding: '14px 16px', fontSize: 12, color: '#666' }}>{d.date || '—'}</td>
                   <td style={{ padding: '16px 20px' }}>
                     <span style={{ display: 'inline-flex', alignItems: 'center', gap: 5, padding: '5px 12px', borderRadius: 20, background: sc.bg, color: sc.color, fontWeight: 700, fontSize: 12 }}>
                       {sc.icon} {sc.label}

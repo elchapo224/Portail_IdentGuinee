@@ -1,29 +1,37 @@
-import React, { createContext, useContext, useEffect, useMemo, useState } from 'react';
+/**
+ * NotificationContext — persistance localStorage avec reset par session citoyen.
+ * Les notifications NE réapparaissent PAS une fois lues.
+ * Le compteur badge est mis à jour en temps réel.
+ */
+import React, { createContext, useContext, useEffect, useMemo, useState, useCallback } from 'react';
 
 const NotificationContext = createContext();
-const STORAGE_KEY = 'identiguinee_notifications';
+const STORAGE_KEY = 'identiguinee_notifications_v2';
 
-const defaultNotifications = [
+const DEFAULT_NOTIFICATIONS = [
   {
-    id: 'notif-1',
-    title: 'Nouveau message du support',
-    subtitle: 'Votre demande a été prise en charge.',
-    time: 'Il y a 15 min',
+    id: 'notif-welcome',
+    title: 'Bienvenue sur IdentiGuinée',
+    subtitle: 'Découvrez tous nos services de documents officiels en ligne.',
+    time: 'Maintenant',
     read: false,
+    type: 'info',
   },
   {
-    id: 'notif-2',
-    title: 'Statut de dossier mis à jour',
-    subtitle: 'Votre demande de Passeport est maintenant en cours.',
+    id: 'notif-naissance',
+    title: 'Vérification NaissanceChain réussie',
+    subtitle: 'Votre acte de naissance a été confirmé avec succès dans le registre.',
+    time: 'Il y a 1h',
+    read: false,
+    type: 'success',
+  },
+  {
+    id: 'notif-rdv',
+    title: 'Rappel rendez-vous',
+    subtitle: 'Votre rendez-vous au centre de Conakry est demain à 10h00.',
     time: 'Hier',
-    read: false,
-  },
-  {
-    id: 'notif-3',
-    title: 'Rappel de documents',
-    subtitle: 'N’oubliez pas de fournir une copie de votre acte de naissance.',
-    time: '3 jours',
     read: true,
+    type: 'warning',
   },
 ];
 
@@ -31,42 +39,64 @@ export const NotificationProvider = ({ children }) => {
   const [notifications, setNotifications] = useState(() => {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
-      return saved ? JSON.parse(saved) : defaultNotifications;
-    } catch {
-      return defaultNotifications;
-    }
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Valider que c'est un tableau valide
+        if (Array.isArray(parsed)) return parsed;
+      }
+    } catch { /* ignore */ }
+    return DEFAULT_NOTIFICATIONS;
   });
 
+  // Persister IMMÉDIATEMENT à chaque changement
   useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
+    try {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(notifications));
+    } catch { /* ignore */ }
   }, [notifications]);
 
   const unreadCount = useMemo(
-    () => notifications.filter((notif) => !notif.read).length,
+    () => notifications.filter(n => !n.read).length,
     [notifications]
   );
 
-  const markAsRead = (id) => {
-    setNotifications((current) =>
-      current.map((notif) =>
-        notif.id === id ? { ...notif, read: true } : notif
-      )
+  const markAsRead = useCallback((id) => {
+    setNotifications(prev =>
+      prev.map(n => n.id === id ? { ...n, read: true } : n)
     );
-  };
+  }, []);
 
-  const markAllAsRead = () => {
-    setNotifications((current) =>
-      current.map((notif) => ({ ...notif, read: true }))
-    );
-  };
+  const markAllAsRead = useCallback(() => {
+    setNotifications(prev => prev.map(n => ({ ...n, read: true })));
+  }, []);
+
+  // Ajouter une notification dynamique (ex: après génération document)
+  const addNotification = useCallback((notif) => {
+    const newNotif = {
+      id: `notif-${Date.now()}`,
+      read: false,
+      time: 'À l\'instant',
+      type: 'info',
+      ...notif,
+    };
+    setNotifications(prev => [newNotif, ...prev]);
+  }, []);
 
   return (
-    <NotificationContext.Provider
-      value={{ notifications, unreadCount, markAsRead, markAllAsRead }}
-    >
+    <NotificationContext.Provider value={{
+      notifications,
+      unreadCount,
+      markAsRead,
+      markAllAsRead,
+      addNotification,
+    }}>
       {children}
     </NotificationContext.Provider>
   );
 };
 
-export const useNotifications = () => useContext(NotificationContext);
+export const useNotifications = () => {
+  const ctx = useContext(NotificationContext);
+  if (!ctx) throw new Error('useNotifications must be used within NotificationProvider');
+  return ctx;
+};

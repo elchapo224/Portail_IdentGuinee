@@ -1,605 +1,477 @@
+/* ════════════════════════════════════════════════════
+   DocumentGenere.css — Design documents officiels guinéens
+════════════════════════════════════════════════════ */
+
+/* ── Layout page ── */
 .doc-page-content {
-  max-width: 1200px;
+  max-width: 900px;
   margin: 0 auto;
-  display: flex;
-  flex-direction: column;
-  gap: 32px;
 }
 
 .doc-header-section {
   display: flex;
   justify-content: space-between;
-  align-items: flex-end;
-  margin-bottom: 8px;
-}
-
-.doc-title {
-  font-size: 32px;
-  font-weight: 700;
-  color: #1A1A1A;
-  margin: 12px 0 8px 0;
-}
-
-.doc-subtitle {
-  font-size: 15px;
-  color: var(--text-muted);
+  align-items: flex-start;
+  flex-wrap: wrap;
+  gap: 16px;
+  margin-bottom: 28px;
 }
 
 .doc-header-actions {
   display: flex;
-  gap: 16px;
+  gap: 10px;
+  flex-wrap: wrap;
 }
 
-.btn-secondary {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background-color: #E9ECEF;
-  color: #495057;
-  border-radius: 100px;
-  font-weight: 600;
-  font-size: 14px;
-  transition: background-color 0.2s;
+.btn-secondary-doc {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 18px; background: var(--bg-card);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  font-size: var(--text-sm); font-weight: 600; cursor: pointer;
+  color: var(--text-main); font-family: var(--font); transition: background 0.15s;
 }
-
-.btn-secondary:hover {
-  background-color: #DEE2E6;
-}
+.btn-secondary-doc:hover { background: var(--bg-main); }
 
 .btn-primary-doc {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  padding: 12px 24px;
-  background-color: var(--primary);
-  color: var(--white);
-  border-radius: 100px;
-  font-weight: 600;
-  font-size: 14px;
-  transition: all 0.2s;
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 9px 18px; background: var(--primary); color: #fff;
+  border: none; border-radius: var(--radius-sm);
+  font-size: var(--text-sm); font-weight: 700; cursor: pointer;
+  font-family: var(--font); transition: opacity 0.2s;
 }
+.btn-primary-doc:hover { opacity: 0.88; }
 
-.btn-primary-doc:hover {
-  background-color: #005a38;
-  transform: translateY(-2px);
-}
-
-.doc-grid {
-  display: grid;
-  grid-template-columns: 1fr 340px;
-  gap: 40px;
-  align-items: start;
-}
-
-/* Official Document Style */
-.official-document {
-  background-color: #fdfdfd;
-  border-radius: 16px;
-  overflow: hidden;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
-  position: relative;
-  border: 1px solid #c2e0cd;
-}
-
-.doc-recto {
-  background: 
-    radial-gradient(circle at 50% 50%, rgba(255, 200, 100, 0.15) 0%, rgba(255, 255, 255, 0) 70%),
-    linear-gradient(135deg, rgba(160, 220, 180, 0.4) 0%, rgba(255, 255, 255, 0.8) 30%, rgba(255, 255, 255, 0.8) 70%, rgba(160, 220, 180, 0.4) 100%),
-    repeating-linear-gradient(45deg, rgba(0,128,0,0.02) 0px, rgba(0,128,0,0.02) 2px, transparent 2px, transparent 10px);
-}
-
-.doc-verso {
-  background: 
-    radial-gradient(circle at 50% 40%, rgba(255, 170, 80, 0.15) 0%, rgba(255, 255, 255, 0) 60%),
-    linear-gradient(90deg, rgba(140, 210, 160, 0.5) 0%, rgba(255, 255, 255, 0.9) 25%, rgba(255, 255, 255, 0.9) 75%, rgba(140, 210, 160, 0.5) 100%),
-    url('https://upload.wikimedia.org/wikipedia/commons/thumb/0/08/Coat_of_arms_of_Guinea.svg/200px-Coat_of_arms_of_Guinea.svg.png');
-  background-size: 100% 100%, 100% 100%, 200px;
-  background-position: center, center, center 40%;
-  background-repeat: no-repeat, no-repeat, no-repeat;
-}
-
-.doc-passport-recto {
-  background: 
-    linear-gradient(180deg, #FAD0C4 0%, #FFD1FF 100%),
-    url('https://www.transparenttextures.com/patterns/cubes.png');
-  background-blend-mode: overlay;
-  padding: 32px 40px;
-}
-
-.doc-passport-verso {
-  background: #FFF9F2;
-  background-image: 
-    radial-gradient(#E9ECEF 1px, transparent 1px),
-    linear-gradient(90deg, rgba(140, 210, 160, 0.2) 0%, rgba(255, 255, 255, 0.9) 100%);
-  background-size: 20px 20px, 100% 100%;
-}
-
-.passport-top-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  border-bottom: 2px solid #CE1126;
-  padding-bottom: 16px;
-  margin-bottom: 16px;
-}
-
-.info-mini label {
-  display: block;
-  font-size: 8px;
-  color: #666;
-  text-transform: uppercase;
-}
-
-.info-mini p {
-  font-size: 12px;
-  font-weight: 800;
-  color: #1A1A1A;
-}
-
-.info-row-passport {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 20px;
-}
-
-.passport-info .info-group label {
-  color: #CE1126;
-}
-
-.passport-mrz {
-  margin-top: 32px;
-  background: rgba(255, 255, 255, 0.7) !important;
-  border: 1px solid rgba(0,0,0,0.1);
-  color: #000 !important;
-}
-
-.info-line {
-  border-bottom: 1px solid #DDD;
-  padding-bottom: 8px;
-}
-
-.info-line label {
-  font-size: 10px;
-  color: #666;
-  font-weight: 600;
-}
-
-.info-val-line {
-  font-size: 15px;
-  font-weight: 700;
-  color: #1A1A1A;
-  margin-top: 4px;
-}
-
-.doc-top-bar {
-  height: 12px;
-  width: 100%;
-  background: linear-gradient(90deg, #CE1126 33.33%, #FCD116 33.33%, #FCD116 66.66%, #009460 66.66%);
-}
-
-.doc-republic-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  padding: 40px 48px 24px 48px;
-}
-
-.republic-left {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.armoiries-img {
-  width: 48px;
-  height: auto;
-}
-
-.rep-title {
-  font-size: 16px;
-  font-weight: 800;
-  color: #006D44;
-  letter-spacing: 1px;
-}
-
-.rep-motto {
-  font-size: 9px;
-  font-weight: 700;
-  color: #CE1126;
-  letter-spacing: 2px;
-  margin-top: 4px;
-}
-
-.republic-right {
-  text-align: right;
-}
-
-.card-type {
-  font-size: 14px;
-  font-weight: 800;
-  color: #1A1A1A;
-  max-width: 200px;
-  margin-left: auto;
-  line-height: 1.3;
-}
-
-.card-id {
-  font-size: 11px;
-  font-weight: 600;
-  color: #868E96;
-  margin-top: 8px;
-  letter-spacing: 1px;
-}
-
-.doc-body {
-  display: flex;
-  padding: 0 48px 32px 48px;
-  gap: 32px;
-}
-
-.doc-photo-col {
-  width: 140px;
-  flex-shrink: 0;
-}
-
-.id-photo {
-  width: 100%;
-  height: 180px;
-  object-fit: cover;
-  border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+.document-wrapper {
+  background: #fff;
+  border-radius: var(--radius-lg);
+  border: 1px solid var(--border);
+  box-shadow: var(--shadow-md);
+  padding: 32px;
   margin-bottom: 24px;
 }
 
-.signature-area {
-  text-align: center;
-  border-top: 1px dashed #CED4DA;
-  padding-top: 12px;
+/* Hash blockchain */
+.hash-display {
+  background: #0a2e1a; border-radius: 12px;
+  padding: 14px 18px; margin-bottom: 24px;
+}
+.hash-label {
+  font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.6);
+  text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 6px;
+}
+.hash-value {
+  font-family: 'Courier New', monospace; font-size: 11px;
+  color: #69f0ae; word-break: break-all; line-height: 1.6;
 }
 
-.signature-label {
-  font-size: 9px;
-  font-weight: 700;
-  color: #ADB5BD;
-  margin-bottom: 4px;
+/* Wallet */
+.wallet-panel {
+  background: var(--bg-card); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); padding: 18px 20px;
+  display: flex; justify-content: space-between; align-items: center;
+  flex-wrap: wrap; gap: 14px; margin-bottom: 24px;
+}
+.wallet-info-card {
+  display: flex; align-items: flex-start; gap: 12px; color: var(--primary);
+}
+.wallet-modal {
+  position: fixed; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 9999; display: flex; align-items: center; justify-content: center; padding: 24px;
+}
+.wallet-modal-card {
+  background: #fff; border-radius: 20px; padding: 32px;
+  max-width: 400px; width: 100%; position: relative;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.2);
+}
+.wallet-close {
+  position: absolute; top: 16px; right: 16px;
+  background: var(--bg-main); border: 1px solid var(--border);
+  border-radius: 8px; padding: 6px; cursor: pointer;
+  display: flex; align-items: center;
 }
 
-.signature-text {
-  font-family: 'Brush Script MT', cursive, serif;
-  font-size: 24px;
-  color: #1A1A1A;
-}
-
-.doc-info-col {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.info-row-2 {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.info-group label {
-  display: block;
-  font-size: 9px;
-  font-weight: 700;
-  color: #868E96;
-  margin-bottom: 4px;
-}
-
-.info-val {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1A1A1A;
-}
-
-.info-val.uppercase {
-  text-transform: uppercase;
-}
-
-.doc-qr-col {
-  width: 120px;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 16px;
-}
-
-.qr-wrapper {
-  background: white;
-  padding: 8px;
-  border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-}
-
-.qr-wrapper img {
-  width: 100%;
-  height: auto;
-}
-
-.blockchain-badge {
-  background-color: #E7F6F0;
-  color: #006D44;
-  padding: 6px 12px;
-  border-radius: 100px;
-  font-size: 9px;
-  font-weight: 800;
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  text-align: center;
-}
-
-.doc-footer {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-end;
-  padding: 24px 48px 32px 48px;
-  border-top: 1px solid rgba(0,0,0,0.05);
-}
-
-.signature-stamp {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.stamp-label {
-  font-size: 9px;
-  font-weight: 700;
-  color: #868E96;
-}
-
-.stamp-ministry {
-  font-size: 11px;
-  font-weight: 700;
-  color: #1A1A1A;
-}
-
-.generation-timestamp {
-  font-size: 10px;
-  color: #ADB5BD;
-  font-family: monospace;
-}
-
-/* Sidebar Styles */
-.doc-sidebar {
-  display: flex;
-  flex-direction: column;
-  gap: 24px;
-}
-
-.sidebar-card {
-  background-color: var(--white);
-  padding: 24px;
-  border-radius: 24px;
-  box-shadow: var(--card-shadow);
-}
-
-.sidebar-card h3 {
-  font-size: 18px;
-  font-weight: 700;
-  margin-bottom: 20px;
-  color: #1A1A1A;
-}
-
-.details-list {
-  list-style: none;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-  margin-bottom: 20px;
-}
-
-.details-list li {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.det-label {
-  font-size: 13px;
-  color: var(--text-muted);
-}
-
-.det-val {
-  font-size: 13px;
-  font-weight: 600;
-  color: #1A1A1A;
-}
-
-.info-alert {
-  background-color: #E7F6F0;
-  padding: 16px;
-  border-radius: 16px;
-  display: flex;
-  gap: 12px;
-  color: #006D44;
-  font-size: 12px;
-  line-height: 1.5;
-}
-
-.security-card {
-  background-color: #064E3B;
-  color: var(--white);
-}
-
-.security-card h3 {
-  color: var(--white);
-  margin-bottom: 12px;
-}
-
-.sec-icon {
-  margin-bottom: 16px;
-  color: #40C057;
-}
-
-.security-card p {
-  font-size: 13px;
-  color: rgba(255, 255, 255, 0.8);
-  line-height: 1.6;
-  margin-bottom: 16px;
-}
-
-.sec-link {
-  font-size: 13px;
-  font-weight: 600;
-  color: #40C057;
-}
-
-.timeline {
-  display: flex;
-  flex-direction: column;
-}
-
-.timeline-item {
-  display: flex;
-  gap: 16px;
-  padding-bottom: 24px;
+/* ════════════════════════════════════════════════════
+   CARTE NATIONALE D'IDENTITÉ CEDEAO
+════════════════════════════════════════════════════ */
+.doc-cni-card {
   position: relative;
+  background: linear-gradient(135deg, #e8f5e2 0%, #f0f8ec 40%, #e0f0d8 70%, #d8ecd0 100%);
+  border-radius: 14px;
+  border: 2px solid #c5e0b0;
+  overflow: hidden;
+  font-family: Arial, sans-serif;
+  max-width: 640px;
+  margin: 0 auto;
+  box-shadow: 0 4px 20px rgba(0,109,44,0.15);
 }
 
-.timeline-item:last-child {
-  padding-bottom: 0;
-}
-
-.timeline-item::before {
-  content: '';
-  position: absolute;
-  left: 11px;
-  top: 24px;
-  bottom: 0;
-  width: 2px;
-  background-color: #F1F3F5;
-}
-
-.timeline-item:last-child::before {
-  display: none;
-}
-
-.timeline-icon {
-  width: 24px;
-  height: 24px;
-  background-color: #F1F3F5;
-  border-radius: 50%;
+.cni-header {
+  background: linear-gradient(90deg, #D84315 0%, #E64A19 40%, #BF360C 100%);
+  padding: 10px 16px;
   display: flex;
   align-items: center;
-  justify-content: center;
-  color: #ADB5BD;
-  position: relative;
-  z-index: 2;
+  justify-content: space-between;
 }
-
-.timeline-icon.success {
-  background-color: #E7F6F0;
-  color: #40C057;
+.cni-header-left { display: flex; align-items: center; gap: 10px; }
+.cni-ecowas-logo { font-size: 28px; filter: brightness(1.2); }
+.cni-republic {
+  font-size: 13px; font-weight: 900; color: #fff;
+  letter-spacing: 0.5px; text-transform: uppercase;
 }
-
-.tl-title {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1A1A1A;
-  margin-bottom: 4px;
+.cni-type {
+  font-size: 10px; font-weight: 700; color: rgba(255,255,255,0.9);
+  letter-spacing: 0.3px;
 }
+.cni-type-en { font-size: 7px; color: rgba(255,255,255,0.7); }
 
-.tl-time {
-  font-size: 12px;
-  color: var(--text-muted);
+/* Drapeau Guinée */
+.cni-flag, .cni-flag-small {
+  display: flex; flex-direction: column; height: 34px; width: 22px;
+  border-radius: 2px; overflow: hidden; flex-shrink: 0;
 }
+.cni-flag-small { height: 22px; width: 14px; }
+.flag-r { flex: 1; background: #CE1126; }
+.flag-g { flex: 1; background: #FCD116; }
+.flag-b { flex: 1; background: #009A44; }
+.flag-r.sm, .flag-g.sm, .flag-b.sm { /* même style */ }
 
-.wallet-card {
-  background-color: #E7F6F0;
-  padding: 24px;
-  border-radius: 24px;
+.cni-body {
   display: flex;
-  flex-direction: column;
+  padding: 14px 16px 12px;
   gap: 16px;
+  position: relative; z-index: 1;
 }
 
-.wallet-icon-wrap {
-  width: 48px;
-  height: 48px;
-  background-color: var(--white);
+.cni-photo-col {
+  display: flex; flex-direction: column; align-items: center; gap: 6px; flex-shrink: 0;
+}
+.cni-photo {
+  width: 90px; height: 110px; object-fit: cover;
+  border: 2px solid #006D44; border-radius: 4px;
+  background: #f0f0f0;
+}
+.cni-sig-label { font-size: 7px; color: #555; }
+.cni-sig-line {
+  width: 90px; height: 1px; background: #333;
+  margin-top: 2px;
+}
+
+.cni-data-col { flex: 1; }
+.cni-right-col {
+  display: flex; flex-direction: column; align-items: flex-end; gap: 8px;
+  flex-shrink: 0; min-width: 80px;
+}
+
+.cni-field {
+  display: flex; flex-direction: column; margin-bottom: 5px;
+}
+.cni-label {
+  font-size: 7.5px; color: #444; font-style: italic;
+  line-height: 1.2;
+}
+.cni-value {
+  font-size: 10.5px; color: #111; line-height: 1.3;
+}
+.cni-value.bold { font-weight: 800; font-size: 12px; }
+.cni-value.mono { font-family: 'Courier New', monospace; font-size: 10px; }
+
+.cni-thumb-area { margin-top: 8px; text-align: right; }
+.cni-thumb-box {
+  width: 44px; height: 56px; border: 1px solid #aaa;
+  border-radius: 4px; display: flex; align-items: center;
+  justify-content: center; font-size: 20px; background: rgba(255,255,255,0.6);
+  margin-left: auto;
+}
+.cni-thumb-label { font-size: 7px; color: #888; margin-top: 2px; }
+
+.cni-watermark {
+  position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);
+  font-size: 120px; opacity: 0.04; z-index: 0; pointer-events: none;
   color: #006D44;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
 }
 
-.wallet-text h4 {
-  font-size: 16px;
-  font-weight: 700;
-  color: #1A1A1A;
+/* Verso CNI */
+.doc-cni-verso {
+  background: linear-gradient(135deg, #e8f5e2 0%, #f0f8ec 40%, #e0f0d8 100%);
+  border-radius: 14px; border: 2px solid #c5e0b0;
+  overflow: hidden; font-family: Arial, sans-serif;
+  max-width: 640px; margin: 0 auto;
+  box-shadow: 0 4px 20px rgba(0,109,44,0.15);
+}
+.cni-verso-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 10px 16px; background: rgba(255,255,255,0.4);
+  border-bottom: 1px solid rgba(0,109,44,0.15);
+}
+.cni-chip { font-size: 24px; }
+.cni-verso-title { text-align: center; }
+.cni-code-pays { font-size: 10px; font-weight: 700; color: #006D44; }
+.cni-autorite { font-size: 9px; color: #333; font-style: italic; }
+.cni-republic-small { font-size: 11px; font-weight: 900; color: #CE1126; letter-spacing: 0.5px; }
+
+.cni-nin-row {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 16px; background: rgba(252,209,22,0.15);
+  border-bottom: 1px solid rgba(0,109,44,0.1);
+}
+.cni-nin-label { font-size: 9px; font-weight: 700; color: #666; }
+.cni-nin-val { font-size: 13px; font-weight: 900; color: #0a2e1a; font-family: 'Courier New', monospace; }
+
+.cni-verso-sig { font-size: 7.5px; color: #555; text-align: center; padding: 4px 16px 0; font-style: italic; }
+.cni-sig-text-verso { font-size: 9px; font-weight: 700; color: #333; text-align: center; }
+.cni-sig-img { font-size: 18px; color: #006D44; text-align: center; padding: 4px 0; }
+
+.cni-verso-grid {
+  display: grid; grid-template-columns: repeat(3, 1fr);
+  padding: 10px 16px; gap: 10px;
+}
+.cni-verso-field { display: flex; flex-direction: column; gap: 2px; }
+
+.cni-mrz {
+  background: #f5f5f5; border-top: 2px solid #ccc;
+  padding: 8px 14px; font-family: 'Courier New', monospace;
+}
+.mrz-line {
+  font-size: 9.5px; letter-spacing: 1.5px; color: #111;
+  white-space: nowrap; overflow: hidden;
+}
+
+/* ════════════════════════════════════════════════════
+   PASSEPORT BIOMÉTRIQUE
+════════════════════════════════════════════════════ */
+.doc-passport {
+  max-width: 680px; margin: 0 auto;
+  font-family: Arial, sans-serif;
+}
+.passport-cover-strip {
+  background: linear-gradient(90deg, #006D44, #004D30);
+  padding: 8px 16px;
+  display: flex; justify-content: space-between;
+  font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.8);
+  letter-spacing: 0.5px; border-radius: 10px 10px 0 0;
+}
+.passport-body {
+  background: linear-gradient(135deg, #f8f4e8 0%, #fdf8ee 50%, #f0ead8 100%);
+  border: 2px solid #c8b87a; border-top: none;
+  border-radius: 0 0 10px 10px; overflow: hidden;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+.passport-header {
+  border-bottom: 2px solid #8B0000;
+  padding: 10px 16px;
+  background: linear-gradient(90deg, #8B0000 0%, #a00000 100%);
+}
+.passport-republic {
+  font-size: 14px; font-weight: 900; color: #fff;
+  letter-spacing: 1px; margin-bottom: 4px;
+}
+.passport-type-row {
+  display: flex; gap: 24px; align-items: flex-end;
+}
+.passport-mini-label { font-size: 7px; color: rgba(255,255,255,0.7); font-style: italic; }
+.passport-mini-val { font-size: 11px; font-weight: 700; color: #fff; }
+.passport-mini-val.bold { font-size: 13px; font-family: 'Courier New', monospace; }
+
+.passport-content {
+  display: flex; padding: 16px; gap: 20px;
+}
+.passport-photo-col {
+  display: flex; flex-direction: column; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.passport-photo {
+  width: 100px; height: 120px; object-fit: cover;
+  border: 2px solid #8B0000; background: #ddd;
+}
+.passport-thumb { display: flex; flex-direction: column; align-items: center; }
+.passport-thumb-box {
+  width: 48px; height: 56px; border: 1px solid #999;
+  border-radius: 2px; display: flex; align-items: center;
+  justify-content: center; font-size: 20px; background: rgba(255,255,255,0.6);
+}
+.passport-thumb-label { font-size: 7px; color: #666; margin-top: 2px; }
+
+.passport-data-col { flex: 1; }
+.passport-field-row { display: flex; gap: 24px; margin-bottom: 8px; }
+.passport-field { flex: 1; }
+.passport-label { font-size: 7.5px; color: #555; font-style: italic; display: block; }
+.passport-val { font-size: 11px; color: #111; display: block; line-height: 1.4; }
+.passport-val.bold { font-weight: 800; font-size: 13px; }
+
+.passport-mrz {
+  background: #f0e8d0; border-top: 2px solid #8B0000;
+  padding: 8px 14px;
+}
+.passport-mrz .mrz-line { font-size: 10px; letter-spacing: 2px; color: #111; font-family: 'Courier New', monospace; }
+
+/* ════════════════════════════════════════════════════
+   ACTE DE NAISSANCE
+════════════════════════════════════════════════════ */
+.doc-acte-naissance {
+  max-width: 680px; margin: 0 auto;
+  font-family: Times New Roman, serif;
+}
+.acte-border-outer {
+  border: 4px solid #7B2D8B;
+  border-radius: 4px;
+  background: linear-gradient(135deg, #f8f0ff 0%, #fdf8ff 50%, #f0e8ff 100%);
+  box-shadow: 0 4px 20px rgba(123,45,139,0.15);
+}
+.acte-border-inner {
+  border: 2px solid #9B4DB0;
+  margin: 6px;
+  border-radius: 2px;
+  padding: 16px 20px;
+}
+
+.acte-header {
+  display: flex; justify-content: space-between; align-items: flex-start;
   margin-bottom: 8px;
 }
+.acte-barcode {
+  font-family: 'Courier New', monospace; font-size: 13px; letter-spacing: 2px;
+  color: #333; writing-mode: vertical-rl; transform: rotate(180deg);
+}
+.acte-header-refs { text-align: right; }
+.acte-ref-line { font-size: 8.5px; color: #444; margin-bottom: 2px; }
 
-.wallet-text p {
-  font-size: 13px;
-  color: #495057;
-  line-height: 1.5;
+.acte-title-block { text-align: center; margin: 10px 0; }
+.acte-seal { font-size: 36px; display: block; }
+.acte-main-title {
+  font-size: 22px; font-weight: 900; color: #2c0a3a;
+  margin: 4px 0 2px; font-style: italic; letter-spacing: 1px;
+}
+.acte-sub-title {
+  font-size: 12px; font-style: italic; color: #555;
+  font-weight: 400; margin: 0 0 2px;
+}
+.acte-sub-fr { font-size: 14px; font-weight: 700; color: #2c0a3a; margin: 0; }
+
+.acte-location-grid {
+  display: grid; grid-template-columns: 1fr 1fr;
+  border: 1px solid #9B4DB0; margin: 8px 0 0;
+}
+.acte-loc-cell {
+  padding: 5px 8px; display: flex; flex-direction: column;
+}
+.acte-loc-cell.border-right { border-right: 1px solid #9B4DB0; }
+.acte-loc-label { font-size: 8px; color: #555; }
+.acte-loc-val { font-size: 10px; font-weight: 700; color: #111; }
+
+.acte-section-title {
+  background: #7B2D8B; color: #fff;
+  font-size: 9px; font-weight: 700; letter-spacing: 1px;
+  text-align: center; padding: 3px 8px; margin: 6px 0 0;
+}
+.acte-data-grid { border: 1px solid #9B4DB0; border-top: none; }
+.acte-data-row {
+  border-bottom: 1px solid #d0b0e0; display: flex;
+}
+.acte-data-row:last-child { border-bottom: none; }
+.acte-data-row.split .acte-data-cell:first-child { border-right: 1px solid #d0b0e0; }
+.acte-data-cell {
+  flex: 1; padding: 4px 8px; display: flex; flex-direction: column;
+}
+.acte-data-cell.border-right { border-right: 1px solid #d0b0e0; }
+.acte-data-label { font-size: 8px; color: #555; font-style: italic; }
+.acte-data-val { font-size: 10px; font-weight: 700; color: #111; }
+
+.acte-approved-block {
+  padding: 8px 0; text-align: center;
+}
+.acte-justice-seal { font-size: 16px; color: #7B2D8B; font-weight: 700; }
+
+.acte-footer {
+  display: flex; justify-content: space-between; align-items: flex-end;
+  margin-top: 12px; gap: 20px;
+}
+.acte-footer-left { display: flex; flex-direction: column; gap: 4px; }
+.acte-dresse { font-size: 9px; color: #333; margin: 0; }
+.acte-officier-label { font-size: 8.5px; color: #444; font-style: italic; margin: 0; }
+.stamp-circle {
+  width: 64px; height: 64px; border: 3px solid #006D44;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+  background: rgba(255,255,255,0.5);
+}
+.stamp-inner { text-align: center; }
+.acte-footer-right { display: flex; flex-direction: column; align-items: center; gap: 6px; }
+.acte-qr { width: 80px; height: 80px; border: 1px solid #ccc; border-radius: 4px; }
+.acte-seal-rouge { font-size: 36px; }
+
+/* ════════════════════════════════════════════════════
+   PERMIS DE CONDUIRE
+════════════════════════════════════════════════════ */
+.doc-permis { max-width: 640px; margin: 0 auto; font-family: Arial, sans-serif; display: flex; flex-direction: column; gap: 20px; }
+
+.permis-recto {
+  background: linear-gradient(135deg, #f0f8e8 0%, #e8f5d8 50%, #deeec8 100%);
+  border: 2px solid #6a8a3a; border-radius: 10px; overflow: hidden;
+  box-shadow: 0 4px 16px rgba(100,138,58,0.15);
+}
+.permis-recto-header {
+  background: linear-gradient(90deg, #2d4a1a 0%, #3d6a2a 100%);
+  padding: 8px 14px; display: flex; align-items: center; gap: 12px;
+}
+.permis-flag-strip { display: flex; flex-direction: row; height: 18px; width: 28px; border-radius: 2px; overflow: hidden; }
+.permis-flag-strip .flag-r, .permis-flag-strip .flag-g, .permis-flag-strip .flag-b { flex: 1; }
+.permis-title-group { flex: 1; text-align: center; }
+.permis-republic { font-size: 9px; font-weight: 700; color: rgba(255,255,255,0.9); letter-spacing: 0.5px; }
+.permis-type { font-size: 14px; font-weight: 900; color: #FCD116; letter-spacing: 1px; }
+.permis-ecowas { font-size: 24px; }
+
+.permis-body-recto { display: flex; padding: 14px; gap: 14px; }
+.permis-photo-col { display: flex; flex-direction: column; align-items: center; gap: 8px; flex-shrink: 0; }
+.permis-photo { width: 80px; height: 96px; object-fit: cover; border: 2px solid #3d6a2a; background: #ddd; }
+.permis-sig-label { font-size: 7px; color: #555; }
+.permis-sig-line { width: 80px; height: 1px; background: #333; }
+.permis-data-col { flex: 1; }
+.permis-right-col { display: flex; flex-direction: column; align-items: flex-end; gap: 8px; flex-shrink: 0; }
+.permis-field { display: flex; gap: 6px; margin-bottom: 4px; align-items: baseline; }
+.permis-label { font-size: 8px; color: #444; font-weight: 700; white-space: nowrap; }
+.permis-val { font-size: 10px; color: #111; }
+.permis-val.bold { font-weight: 800; }
+.permis-val.red { color: #CE1126; font-size: 12px; font-family: 'Courier New', monospace; }
+.permis-qr { width: 66px; height: 66px; border: 1px solid #ccc; border-radius: 3px; }
+
+/* Verso permis */
+.permis-verso {
+  background: #f8f8f8; border: 2px solid #6a8a3a;
+  border-radius: 10px; padding: 14px; overflow: hidden;
+}
+.permis-verso-header { display: flex; justify-content: space-between; margin-bottom: 10px; }
+.permis-verso-num { font-family: 'Courier New', monospace; font-size: 12px; font-weight: 700; color: #333; }
+.permis-verso-stamp { display: flex; align-items: center; }
+.permis-stamp-circle {
+  width: 60px; height: 60px; border: 2px solid #006D44;
+  border-radius: 50%; display: flex; align-items: center; justify-content: center;
+}
+.permis-categories { display: flex; flex-direction: column; gap: 3px; margin-bottom: 10px; }
+.permis-cat-header { display: flex; gap: 8px; font-size: 9px; font-weight: 700; color: #555; padding: 0 4px 4px; border-bottom: 1px solid #ccc; }
+.permis-cat-row { display: flex; align-items: center; gap: 8px; padding: 2px 4px; border-bottom: 1px dotted #ddd; }
+.permis-cat-code { font-size: 11px; font-weight: 700; width: 16px; color: #333; }
+.permis-cat-img { font-size: 14px; width: 20px; }
+.permis-cat-date { flex: 1; font-size: 9px; color: #555; }
+.permis-cat-check { font-size: 12px; color: #333; }
+.permis-verso-expiry { font-size: 9px; color: #333; border-top: 1px solid #ccc; padding-top: 6px; }
+.permis-verso-expiry .bold { font-weight: 700; }
+.permis-verso-qr { text-align: right; margin-top: 4px; }
+.permis-qr-verso { width: 72px; height: 72px; border: 1px solid #ccc; border-radius: 3px; }
+
+/* ── Responsive ── */
+@media (max-width: 768px) {
+  .document-wrapper { padding: 16px; }
+  .doc-header-section { flex-direction: column; }
+  .cni-body { flex-wrap: wrap; }
+  .passport-content { flex-direction: column; }
+  .cni-verso-grid { grid-template-columns: 1fr 1fr; }
+  .doc-permis { padding: 0; }
+  .permis-body-recto { flex-wrap: wrap; }
+  .acte-location-grid { grid-template-columns: 1fr; }
 }
 
-.btn-wallet {
-  background-color: #1A1A1A;
-  color: var(--white);
-  padding: 14px;
-  border-radius: 100px;
-  font-weight: 600;
-  font-size: 14px;
-  text-align: center;
-  transition: transform 0.2s;
-}
-
-.btn-wallet:hover {
-  transform: translateY(-2px);
-}
-
-/* Print Styles */
 @media print {
-  .sidebar, .header, .doc-header-section, .doc-sidebar, .breadcrumbs, .doc-subtitle {
-    display: none !important;
-  }
-  
-  .layout-wrapper {
-    display: block !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  
-  .main-content {
-    margin-left: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-  }
-  
-  .doc-page-content {
-    padding: 0 !important;
-    margin: 0 !important;
-    display: block !important;
-  }
-  
-  .doc-grid {
-    display: block !important;
-  }
-  
-  .document-container {
-    width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-  
-  .official-document {
-    box-shadow: none !important;
-    border: 1px solid #EEEEEE !important;
-    margin: 0 auto !important;
-    width: 100% !important;
-    max-width: 800px !important;
-    border-radius: 0 !important;
-  }
+  .layout-wrapper, .sidebar, .header-root, .doc-header-section,
+  .wallet-panel, .hash-display, .breadcrumbs { display: none !important; }
+  .document-wrapper { box-shadow: none; border: none; padding: 0; }
+  .main-content { margin: 0; padding: 0; }
+  body { background: white; }
 }
