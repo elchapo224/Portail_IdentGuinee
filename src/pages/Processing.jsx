@@ -100,17 +100,17 @@ const Processing = () => {
         }, INTERVAL);
 
         const timeline = [
-          { time: 2000, log: 'Connexion sécurisée établie avec le serveur MATD...', type: 'success', step: 1, dbStatus: `${docCode}:Authentification` },
+          { time: 2000, log: '[MATD] Connexion TLS 1.3 établie — Serveur d\'État Civil National...', type: 'success', step: 1, dbStatus: `${docCode}:Authentification` },
           { time: 5000, log: 'Vérification des identifiants citoyen GN-SEC-V3...', type: 'info' },
-          { time: 8000, log: 'Analyse du registre national de naissance en cours...', type: 'info', step: 2, dbStatus: `${docCode}:Registre` },
+          { time: 8000, log: '[RNEC] Interrogation du Registre National de l\'État Civil (RNEC-GN)...', type: 'info', step: 2, dbStatus: `${docCode}:Registre` },
           { time: 11000, log: `Acte de naissance #${numActe || 'N/A'} localisé dans le registre central.`, type: 'success' },
           { time: 14000, log: 'Extraction des métadonnées parentales...', type: 'info' },
-          { time: 17000, log: "Démarrage de l'analyse biométrique comparative...", type: 'info', step: 3, dbStatus: `${docCode}:Biométrie` },
+          { time: 17000, log: "[BIOM] Vérification biométrique — Base données MATD/DNEC...", type: 'info', step: 3, dbStatus: `${docCode}:Biométrie` },
           { time: 20000, log: 'Vérification de la cohérence photo via IA souveraine...', type: 'info' },
           { time: 23000, log: 'Authentification biométrique réussie. Score: 99.8%', type: 'success' },
-          { time: 26000, log: "Préparation de l'ancrage Blockchain NaissanceChain...", type: 'info', step: 4, dbStatus: `${docCode}:Blockchain` },
+          { time: 26000, log: "[CHAIN] Préparation ancrage NaissanceChain — Réseau national...", type: 'info', step: 4, dbStatus: `${docCode}:Blockchain` },
           { time: 29000, log: 'Génération du hash cryptographique du document...', type: 'info' },
-          { time: 32000, log: 'Transaction confirmée sur le réseau national. Bloc #G821-X', type: 'success', step: 5, dbStatus: `${docCode}:Finalisation` },
+          { time: 32000, log: '[CHAIN] Bloc confirmé — Hash ancré sur le Registre Guinéen Décentralisé', type: 'success', step: 5, dbStatus: `${docCode}:Finalisation` },
           { time: 35000, log: `Génération du certificat ${type_document} sécurisé avec QR Code...`, type: 'info' },
           { time: 38000, log: `Finalisation du titre numérique officiel : ${type_document}...`, type: 'info' }
         ];

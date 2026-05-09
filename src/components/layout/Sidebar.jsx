@@ -82,6 +82,23 @@ const Sidebar = ({ open, onClose }) => {
           <LogOut size={18} /><span>Déconnexion</span>
         </button>
       </div>
+    {/* Footer officiel République de Guinée */}
+      <div style={{ padding: '12px 16px', borderTop: '1px solid var(--border)', marginTop: 8 }}>
+        <div style={{ display: 'flex', height: 4, borderRadius: 2, overflow: 'hidden', marginBottom: 8 }}>
+          <div style={{ flex: 1, background: '#CE1126' }}/>
+          <div style={{ flex: 1, background: '#FCD116' }}/>
+          <div style={{ flex: 1, background: '#009A44' }}/>
+        </div>
+        <div style={{ fontSize: 9, color: 'var(--text-faint)', textAlign: 'center', letterSpacing: 0.5, fontWeight: 700 }}>
+          République de Guinée
+        </div>
+        <div style={{ fontSize: 8, color: 'var(--text-faint)', textAlign: 'center', letterSpacing: 1, textTransform: 'uppercase', marginTop: 2 }}>
+          Travail · Justice · Solidarité
+        </div>
+        <div style={{ fontSize: 8, color: 'var(--text-faint)', textAlign: 'center', marginTop: 4, opacity: 0.6 }}>
+          NaissanceChain v1.0 · MIABE 2026
+        </div>
+      </div>
     </aside>
   );
 };

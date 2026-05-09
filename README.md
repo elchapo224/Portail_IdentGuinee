@@ -1,142 +1,96 @@
-
-# IdentiGuinée — Portail d'Identité Numérique Nationale
-
-Plateforme officielle de gestion d'identité numérique de la République de Guinée.
-
-Bienvenue sur le dépôt du projet **IdentiGuinée**, réalisé dans le cadre de la phase 2 du Miabé Hackathon !
-
-Ce projet est une preuve de concept (PoC) visant à moderniser et sécuriser l'état civil en Guinée, en supprimant les intermédiaires et en luttant contre la fraude documentaire grâce à la technologie.
+# IdentiGuinée — Portail Citoyen v5.0
+## Projet GN-02 · MIABE Hackathon 2026 · Équipe Commit United
 
 ---
 
-##  La logique de l'application
+## 🇬🇳 République de Guinée — Travail · Justice · Solidarité
 
-Le but d'IdentiGuinée est de rendre les démarches administratives simples, rapides et transparentes pour les citoyens guinéens. Voici le parcours de notre démo :
-
-1. **Connexion citoyenne** : L'utilisateur s'identifie sur le portail (les données sont conservées dynamiquement pour personnaliser toute l'interface à son nom).
-2. **Tableau de bord** : Une vue d'ensemble rassurante sur ses documents et les services disponibles (Passeport, CNI, etc.).
-3. **Formulaire intelligent** : Lors d'une demande de document (ex: Carte Nationale d'Identité), le citoyen renseigne son **numéro d'acte de naissance**.
-4. **Validation en temps réel** : Le système interroge instantanément notre base de données sécurisée. Si l'acte officiel est trouvé, le bouton "Continuer" se déverrouille.
-5. **Traitement automatisé** : L'utilisateur assiste visuellement au processus de croisement des données. Aucune intervention humaine n'est requise, ce qui garantit la neutralité et bloque la corruption.
-6. **Délivrance** : Le document officiel (sécurisé) est généré en quelques secondes.
+**IdentiGuinée** est une plateforme officielle d'identité numérique citoyenne basée sur la blockchain NaissanceChain. Elle permet à chaque citoyen guinéen de demander et vérifier ses documents d'identité officiels de façon transparente, sans corruption et sans intermédiaire.
 
 ---
 
-## 🔗 Le concept "NaissanceChain" (Blockchain)
+## Stack Technique
 
-En Guinée, l'absence d'un registre d'état civil centralisé et infalsifiable est un défi majeur. C'est là qu'intervient notre concept de **NaissanceChain**.
-
-Bien que simulé ici techniquement via Supabase pour les besoins de rapidité du hackathon, la vision est la suivante :
-* Chaque acte de naissance se voit attribuer une "empreinte" numérique cryptographique (un *hash* blockchain).
-* Une fois enregistré dans ce grand registre décentralisé gouvernemental, cet acte ne peut **jamais** être modifié, falsifié ou supprimé.
-* Lorsqu'un citoyen fait une demande, notre plateforme vient interroger cette *NaissanceChain*. Si l'acte existe, il est validé. Cela permet d'éliminer le fléau des faux actes de naissance à la racine.
+| Couche | Technologie |
+|--------|------------|
+| Frontend | React 18 + Vite |
+| Base de données | Supabase (PostgreSQL + RLS) |
+| Blockchain simulée | NaissanceChain (hachage SHA-256) |
+| Auth | Supabase Auth + sessions admin sécurisées |
+| Déploiement | Vercel |
 
 ---
 
-##  Démarrer le projet en local
+## Changelog v5.0 (Audit Jury Senior — Mai 2026)
 
-Pour tester l'application sur votre machine (parfait pour la démo live), suivez ces étapes simples :
+### 🔐 Sécurité & Corrections critiques
+- **Numéros de documents stables** : `mkNIN` et `mkPassNum` maintenant déterministes (hash basé sur `id_acte`). Plus de re-génération à chaque render React.
+- **Ministère corrigé** : Verify.jsx référençait le "Ministère de la Justice" pour l'état civil → corrigé en **MATD — Direction Nationale de l'État Civil**.
+- **Template literals** : tous les `\${}` mal échappés corrigés dans DocumentGenere.jsx.
 
-### 1. Prérequis
-- Vous devez avoir [Node.js](https://nodejs.org/) installé sur votre ordinateur.
+### 🎨 Design & Authenticité Officielle
+- **CNI couleur rose/fuchsia (#9B1B5A)** : conforme au document officiel guinéen (Décret D/95/254). Fonds, bordures, MRZ et textes mis à jour.
+- **Armoiries SVG** : remplacement de l'emoji 🦅 par des armoiries SVG fidèles (étoile + drapeau tricolore) dans tous les documents.
+- **Drapeau tricolore** (Rouge/Or/Vert) ajouté dans : Login, Sidebar, Header mobile, AdminLayout, HeroBanner, Verifier, DemandForm.
+- **Devise nationale** "Travail · Justice · Solidarité" visible dans : Login (tagline), HeroBanner, Sidebar footer, Verifier.
 
-### 2. Installation
-Ouvrez votre terminal, placez-vous dans le dossier du projet et installez les dépendances :
+### 📄 Documents Officiels — Conformité
+- **Acte de naissance** : mention de la **Loi L/2015/013/AN du 6 Juillet 2015** (modernisation état civil) ajoutée.
+- **Passeport** : mention de la norme **OACI 9303** ajoutée.
+- **Ordonnance N° 92-027/PRG/SGG du 12 Mai 1992** : maintenue et contextualisée.
+
+### 💰 Tarifs Officiels Harmonisés (conformes aux tarifs guinéens réels)
+| Document | Ancien tarif | Nouveau tarif | Délai |
+|----------|-------------|---------------|-------|
+| CNI Biométrique | Gratuit | **50 000 GNF** | 72h ouvrables |
+| Passeport | 500 000 GNF | **300 000 GNF** | 15 jours |
+| Extrait de naissance | 15 000 GNF | **10 000 GNF** | 24h ouvrables |
+| Permis de conduire | 250 000 GNF | **150 000 GNF** | 7 jours |
+
+### 🏛️ Branding Républicain
+- **Login** : drapeau + devise + badge "Projet GN-02 · MIABE Hackathon 2026".
+- **Dashboard** : ServiceCards affichent maintenant le prix et le délai de chaque document.
+- **AdminDashboard** : titre mis à jour "Surveillance NaissanceChain" + badge République.
+- **Processing** : logs de traitement avec terminologie officielle [MATD][RNEC][BIOM][CHAIN].
+- **Verifier** : badge "REGISTRE NATIONAL — NAISSANCECHAIN" + drapeau sur les pages de résultat.
+- **DemandForm** : disclaimer légal officiel (Ordonnance + Loi L/2015) ajouté avant soumission.
+- **Sidebar** : footer République de Guinée + devise nationale.
+
+---
+
+## Structure des entités Supabase
+
+```
+naissancechain     → Registre des actes de naissance (blockchain simulée)
+citoyens           → Table des citoyens inscrits (auth + profil)
+documents_certifies → Documents officiels générés et certifiés
+```
+
+---
+
+## Déploiement
+
 ```bash
 npm install
+npm run dev        # Développement (http://localhost:5173)
+npm run build      # Production → dist/
 ```
 
-### 3. Base de données (Supabase)
-Pour que la vérification en temps réel fonctionne :
-1. Assurez-vous que vos identifiants Supabase sont bien renseignés dans `src/lib/supabase.js`.
-2. Assurez-vous d'avoir créé la table `naissance_chain` et d'y avoir inséré au moins un acte (ex: `001/RC/MATAM/2023`).
-
-### 4. Lancement
-Démarrez le serveur de développement :
-```bash
-npm run dev
+### Variables d'environnement (.env)
 ```
-Ouvrez ensuite le lien affiché dans votre terminal (généralement `http://localhost:5173`) dans votre navigateur !
+VITE_SUPABASE_URL=https://xxxxx.supabase.co
+VITE_SUPABASE_ANON_KEY=eyJxxx...
+```
 
 ---
 
-## Stack
+## Accès de démonstration
 
-- **React 18** + **Vite 5**
-- **Supabase** (base de données, authentification)
-- **React Router v6**
-- **Lucide Icons**
-
-## Démarrage local
-
-```bash
-npm install
-npm run dev
-```
-
-## Déploiement Vercel
-
-```bash
-# 1. Push sur GitHub
-git init && git add . && git commit -m "IdentiGuinée v10"
-git remote add origin https://github.com/VOTRE_COMPTE/identiguinee.git
-git push -u origin main
-
-# 2. Import sur Vercel
-# → https://vercel.com/new → importer le repo
-# → Framework: Vite (auto-détecté)
-# → Pas de variables d'env nécessaires (Supabase public key dans le code)
-```
-
-## Structure
-
-```
-src/
-├── admin/          → Interface Administration
-├── components/     → Sidebar, Header, Layout
-├── context/        → AuthContext, NotificationContext
-├── lib/            → supabase.js, documentTypes.js
-└── pages/          → Toutes les pages citoyens
-```
-
-## Vérification QR Code
-
-L'URL de vérification publique est :
-```
-https://votre-domaine.vercel.app/verify/{document_id}
-ou
-https://votre-domaine.vercel.app/verify?id={doc_id}&acte={id_acte}
-```
-
-Accessible sans connexion par toute organisation tierce.
-
-## Comptes de démonstration
-
-| Type | Login | Mot de passe |
-|------|-------|-------------|
-| Admin | `admin` | `admin123` → puis clé secrète : `IDENTIGUINEE@2025!` |
-| Citoyen | Email ou N° acte | Mot de passe enregistré |
+| Rôle | Identifiants |
+|------|-------------|
+| Citoyen | email@demo.gn / password |
+| Admin | ⚙️ Section cachée dans Login (5 clics sur le logo) |
 
 ---
 
-## 🛠️ Dernières Mises à Jour (06/05/2026)
-
-De nombreuses améliorations de stabilité et de nouvelles fonctionnalités ont été ajoutées aujourd'hui pour rendre la démo robuste et professionnelle :
-
-### ✅ Nouvelles Fonctionnalités
-- **Téléchargement de documents** : Les citoyens peuvent désormais télécharger leurs documents générés (Passeport, CNI, etc.) aux formats **PDF** et **PNG**.
-- **Synchronisation Cloud du Profil** : La photo de profil (avatar) est désormais sauvegardée dans Supabase. Vos modifications en local sont maintenant visibles sur la version déployée (Vercel).
-- **Vérification Publique Renforcée** : Amélioration de la logique de lecture des QR codes pour une authentification instantanée.
-
-### 📱 Interface & Responsivité
-- **Full Responsive Design** : Optimisation complète pour mobile et tablette. Le portail est désormais parfaitement utilisable sur smartphone (menus burger, grilles adaptatives).
-- **Amélioration du Dashboard** : Synchronisation plus intelligente des données citoyennes avec le registre *NaissanceChain*.
-
-### 🐞 Correctifs & Stabilité
-- **Fix "Écran Blanc"** : Résolution d'un crash critique sur la page de suivi des demandes lié au formatage des identifiants numériques.
-- **Sécurisation des données** : Ajout de couches de sécurité (optional chaining) pour éviter les erreurs de rendu en cas de données incomplètes en base.
-- **Support Vercel** : Documentation des étapes pour débloquer les déploiements sur les comptes Vercel Hobby.
-
----
-
-*Fait avec passion pour l'avenir numérique de la Guinée. 🇬🇳*
+*© 2026 — Équipe Commit United — MIABE Hackathon — République de Guinée*

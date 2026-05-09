@@ -120,9 +120,14 @@ const AdminDashboard = () => {
       {/* En-tête */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 28 }}>
         <div>
-          <p style={{ fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--text-faint)', letterSpacing: 1, textTransform: 'uppercase', marginBottom: 6 }}>Tableau de bord</p>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 8 }}>
+            <div style={{ display: 'flex', height: 16, width: 28, borderRadius: 3, overflow: 'hidden', boxShadow: '0 1px 4px rgba(0,0,0,0.15)' }}>
+              <div style={{ flex: 1, background: '#CE1126' }}/><div style={{ flex: 1, background: '#FCD116' }}/><div style={{ flex: 1, background: '#009A44' }}/>
+            </div>
+            <p style={{ fontSize: 'var(--text-xs)', fontWeight: 700, color: 'var(--text-faint)', letterSpacing: 1, textTransform: 'uppercase', margin: 0 }}>Administration · République de Guinée</p>
+          </div>
           <h1 style={{ fontSize: 'var(--text-3xl)', fontWeight: 800, color: 'var(--text-heading)', margin: 0, letterSpacing: -0.5 }}>
-            Surveillance système
+            Surveillance NaissanceChain
           </h1>
           <p style={{ color: 'var(--text-muted)', fontSize: 'var(--text-base)', margin: '4px 0 0' }}>
             Identité numérique nationale — données en temps réel

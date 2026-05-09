@@ -3,15 +3,21 @@ export const DOCUMENT_TYPES = {
     value: 'CNI',
     label: "Carte Nationale d'Identité Biométrique",
     shortLabel: "Carte d'Identité",
-    description: "Carte nationale d'identité biométrique sécurisée conforme aux normes guinéennes.",
-    note: "CNIB avec puce et données biométriques."
+    description: "Carte nationale d'identité biométrique sécurisée conforme aux normes CEDEAO et guinéennes.",
+    note: "CNIB avec puce et données biométriques.",
+    prix: "50 000 GNF",
+    delai: "72h ouvrables",
+    ministere: "MATD"
   },
   PASSEPORT: {
     value: 'PASSEPORT',
-    label: 'Passeport Ordinaire',
+    label: 'Passeport Biométrique Ordinaire',
     shortLabel: 'Passeport',
-    description: 'Passeport ordinaire conforme aux normes OACI pour voyage international.',
-    note: "Document de voyage international délivré par les autorités guinéennes."
+    description: 'Passeport biométrique conforme aux normes OACI 9303 pour voyage international.',
+    note: "Document de voyage international — valide 5 ans.",
+    prix: "300 000 GNF",
+    delai: "15 jours ouvrables",
+    ministere: "MSPC"
   },
   NAISSANCE: {
     value: 'NAISSANCE',

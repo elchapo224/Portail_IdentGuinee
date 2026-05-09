@@ -125,6 +125,8 @@ const Dashboard = () => {
                 documentType={DOCUMENT_TYPES.CNI.value}
                 description={DOCUMENT_TYPES.CNI.description}
                 note={DOCUMENT_TYPES.CNI.note}
+                prix={DOCUMENT_TYPES.CNI.prix}
+                delai={DOCUMENT_TYPES.CNI.delai}
               />
               <ServiceCard 
                 iconType="passport"
@@ -132,6 +134,8 @@ const Dashboard = () => {
                 documentType={DOCUMENT_TYPES.PASSEPORT.value}
                 description={DOCUMENT_TYPES.PASSEPORT.description}
                 note={DOCUMENT_TYPES.PASSEPORT.note}
+                prix={DOCUMENT_TYPES.PASSEPORT.prix}
+                delai={DOCUMENT_TYPES.PASSEPORT.delai}
               />
               <ServiceCard 
                 iconType="birth"
@@ -139,6 +143,8 @@ const Dashboard = () => {
                 documentType={DOCUMENT_TYPES.NAISSANCE.value}
                 description={DOCUMENT_TYPES.NAISSANCE.description}
                 note={DOCUMENT_TYPES.NAISSANCE.note}
+                prix={DOCUMENT_TYPES.NAISSANCE.prix}
+                delai={DOCUMENT_TYPES.NAISSANCE.delai}
               />
               <ServiceCard 
                 iconType="driver"
@@ -146,6 +152,8 @@ const Dashboard = () => {
                 documentType={DOCUMENT_TYPES.PERMIS.value}
                 description={DOCUMENT_TYPES.PERMIS.description}
                 note={DOCUMENT_TYPES.PERMIS.note}
+                prix={DOCUMENT_TYPES.PERMIS.prix}
+                delai={DOCUMENT_TYPES.PERMIS.delai}
               />
             </div>
           </section>

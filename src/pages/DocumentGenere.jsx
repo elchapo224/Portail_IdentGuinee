@@ -4,9 +4,9 @@
  * QR codes réels pointant vers /verify/:docId
  * Export PDF haute résolution
  */
-import React, { useState, useEffect, useRef, Component } from 'react';
+import React, { useState, useEffect, useRef, Component, useMemo } from 'react';
 import Layout from '../components/layout/Layout';
-import { ChevronRight, Download, Printer, CheckCircle, Loader, X, Smartphone, Info, Shield } from 'lucide-react';
+import { ChevronRight, Download, Printer, CheckCircle, Loader, Shield } from 'lucide-react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
 import { useAuth } from '../context/AuthContext';
@@ -40,14 +40,27 @@ const fmtDateUP = (v) => {
   catch { return String(v); }
 };
 const addYrs = (n) => { const d = new Date(); d.setFullYear(d.getFullYear()+n); return fmtDateUP(d); };
-const mkNIN = (acte) => {
-  const seed = (acte?.id_acte || '').replace(/\D/g,'').padStart(4,'0').slice(-4);
-  const rnd = Math.floor(10000000 + Math.random()*89999999).toString();
-  return `GIN${seed}${rnd}`;
+// Génération stable basée sur le hash de l'id_acte (pas de Math.random au render)
+const stableNum = (seed, mod, pad = 0) => {
+  let h = 0;
+  const s = String(seed || 'default');
+  for (let i = 0; i < s.length; i++) { h = ((h << 5) - h + s.charCodeAt(i)) | 0; }
+  const n = Math.abs(h) % mod;
+  return pad > 0 ? String(n).padStart(pad, '0') : String(n);
 };
-const mkPassNum = () => {
+const mkNIN = (acte) => {
+  const seed = acte?.id_acte || acte?.numero_identifiant_national || 'GIN0000';
+  const s1 = stableNum(seed, 99999999, 8);
+  const s2 = stableNum(seed + 'NIN', 9999, 4);
+  return `GIN${s2}${s1}`;
+};
+const mkPassNum = (acte) => {
+  const seed = acte?.id_acte || 'PASS';
   const letters = 'ABCDEFGHJKLMNPQRSTUVWXYZ';
-  return letters[Math.floor(Math.random()*letters.length)] + letters[Math.floor(Math.random()*letters.length)] + Math.floor(100000 + Math.random()*899999);
+  const i1 = Math.abs(stableNum(seed, 24) | 0) % 24;
+  const i2 = Math.abs(stableNum(seed + 'B', 24) | 0) % 24;
+  const num = stableNum(seed + 'NUM', 899999, 6);
+  return letters[i1] + letters[i2] + (100000 + parseInt(num));
 };
 
 // QR Code URL via api.qrserver.com (gratuit, fiable)
@@ -145,7 +158,7 @@ const SignatureMinistere = ({ ministere = "MATD", long = false, dark = false }) 
   return (
     <div style={{
       background: bgColor,
-      border: `1px solid \${borderColor}`,
+      border: `1px solid ${borderColor}`,
       borderRadius: 8,
       padding: long ? '14px 16px' : '10px 14px',
       display: 'flex',
@@ -198,7 +211,7 @@ const SignatureMinistere = ({ ministere = "MATD", long = false, dark = false }) 
       {/* Droite : signature SVG + nom */}
       <div style={{ textAlign: 'center', minWidth: 140 }}>
         <div style={{ fontSize: 7.5, color: labelColor, marginBottom: 4 }}>Signature électronique certifiée</div>
-        <div style={{ borderBottom: `1.5px solid \${lineColor}`, paddingBottom: 4, marginBottom: 4 }}>
+        <div style={{ borderBottom: `1.5px solid ${lineColor}`, paddingBottom: 4, marginBottom: 4 }}>
           <svg width="135" height="36" viewBox="0 0 135 36">
             <path d={sigPath} fill="none" stroke={info.color} strokeWidth="1.8" strokeLinecap="round" opacity="0.7"/>
             {/* Paraphe */}
@@ -226,7 +239,7 @@ const PasseportBiometrique = ({ acte, user, documentId }) => {
   const ddn    = acte?.date_naissance || user?.date_naissance;
   const lieu   = (acte?.lieu_naissance || 'CONAKRY').toUpperCase();
   const genre  = (acte?.genre === 'F' || acte?.genre === 'Féminin') ? 'F' : 'M';
-  const numPass = mkPassNum();
+  const numPass = useMemo(() => mkPassNum(acte), [acte?.id_acte]);
   const nin    = mkNIN(acte);
   const emis   = new Date();
   const expire = new Date(); expire.setFullYear(expire.getFullYear() + 5);
@@ -272,8 +285,14 @@ const PasseportBiometrique = ({ acte, user, documentId }) => {
         }}>
           {/* Armoiries + texte */}
           <div style={{ display: 'flex', alignItems: 'center', gap: 14 }}>
-            <div style={{ width: 52, height: 52, background: 'rgba(255,255,255,0.15)', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 28 }}>
-              🦅
+            <div style={{ width: 52, height: 52, background: 'rgba(255,255,255,0.15)', borderRadius: '50%', border: '2px solid rgba(255,255,255,0.4)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="28" height="28" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="47" fill="rgba(255,255,255,0.15)" stroke="#FCD116" strokeWidth="2"/>
+                <polygon points="50,20 55,36 72,36 59,46 63,63 50,53 37,63 41,46 28,36 45,36" fill="#FCD116"/>
+                <rect x="22" y="74" width="18" height="11" rx="1" fill="#CE1126"/>
+                <rect x="41" y="74" width="18" height="11" rx="1" fill="#FCD116"/>
+                <rect x="60" y="74" width="18" height="11" rx="1" fill="#009A44"/>
+              </svg>
             </div>
             <div>
               <div style={{ fontSize: 10, fontWeight: 700, color: 'rgba(255,255,255,0.8)', letterSpacing: 2, textTransform: 'uppercase' }}>République de Guinée</div>
@@ -289,7 +308,7 @@ const PasseportBiometrique = ({ acte, user, documentId }) => {
               <div style={{ flex: 1, background: '#009A44' }}/>
             </div>
             <div style={{ background: '#FCD116', color: '#006D44', fontSize: 10, fontWeight: 900, padding: '2px 8px', borderRadius: 4 }}>
-              TYPE P · ORDINAIRE
+              TYPE P · ORDINAIRE · OACI 9303
             </div>
           </div>
         </div>
@@ -396,15 +415,7 @@ const PasseportBiometrique = ({ acte, user, documentId }) => {
         }} />
       </div>
 
-      {/* Notice QR */}
-      {qrUrl && (
-        <div style={{ marginTop: 12, padding: '10px 16px', background: '#f0fdf4', border: '1px solid #b8d8b8', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Smartphone size={18} color="#006D44" style={{ flexShrink: 0 }} />
-          <p style={{ fontSize: 12, color: '#2d5a2d', margin: 0 }}>
-            <strong>Vérification instantanée :</strong> Scannez le QR code avec votre téléphone pour confirmer l'authenticité de ce passeport via NaissanceChain.
-          </p>
-        </div>
-      )}
+      {/* QR vérification intégré dans le document */}
     </div>
   );
 };
@@ -426,7 +437,8 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId }) => {
   const avatarURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(prenom.charAt(0)+' '+nom.charAt(0))}&background=1a5a30&color=fff&bold=true&size=200`;
 
   const CARD = { width: '100%', maxWidth: 720, fontFamily: 'Arial, sans-serif' };
-  const RECTO_BG = 'linear-gradient(135deg, #d4edda 0%, #e8f5e8 30%, #f0faf0 60%, #dcedc8 100%)';
+  // CNI guinéenne = document ROSE/FUCHSIA selon normes officielles (Décret D/95/254)
+  const RECTO_BG = 'linear-gradient(135deg, #fde8f0 0%, #f9d0e4 30%, #fce4ef 60%, #f5c6de 100%)';
   const VERSO_BG = 'linear-gradient(135deg, #e8f5e8 0%, #f0faf0 50%, #d4edda 100%)';
 
   return (
@@ -434,7 +446,7 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId }) => {
       {/* ── RECTO ── */}
       <div style={{
         background: RECTO_BG,
-        border: '2px solid #2d5a2d',
+        border: '2px solid #7a1547',
         borderRadius: 10,
         overflow: 'hidden',
         boxShadow: '0 6px 24px rgba(0,80,0,0.15)',
@@ -442,7 +454,7 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId }) => {
         position: 'relative',
       }}>
         {/* Guilloché fond */}
-        <div style={{ position: 'absolute', inset: 0, opacity: 0.035, zIndex: 0, backgroundImage: 'repeating-linear-gradient(30deg, #006D44 0, #006D44 1px, transparent 0, transparent 40%)', backgroundSize: '6px 6px' }} />
+        <div style={{ position: 'absolute', inset: 0, opacity: 0.035, zIndex: 0, backgroundImage: 'repeating-linear-gradient(30deg, #9B1B5A 0, #9B1B5A 1px, transparent 0, transparent 40%)', backgroundSize: '6px 6px' }} />
 
         {/* Bande supérieure rouge tricolore */}
         <div style={{ height: 7, background: 'linear-gradient(90deg, #CE1126 33%, #FCD116 33% 66%, #009A44 66%)', position: 'relative', zIndex: 1 }} />
@@ -455,7 +467,15 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId }) => {
           position: 'relative', zIndex: 1,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ width: 36, height: 36, background: 'rgba(255,255,255,0.15)', borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 20 }}>🦅</div>
+            <div style={{ width: 36, height: 36, background: 'rgba(255,255,255,0.15)', borderRadius: '50%', border: '1.5px solid rgba(255,255,255,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <svg width="22" height="22" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="50" cy="50" r="47" fill="rgba(255,255,255,0.1)" stroke="#FCD116" strokeWidth="3"/>
+                <polygon points="50,20 55,36 72,36 59,46 63,63 50,53 37,63 41,46 28,36 45,36" fill="#FCD116"/>
+                <rect x="22" y="74" width="18" height="11" rx="1" fill="#CE1126"/>
+                <rect x="41" y="74" width="18" height="11" rx="1" fill="#FCD116"/>
+                <rect x="60" y="74" width="18" height="11" rx="1" fill="#009A44"/>
+              </svg>
+            </div>
             <div>
               <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.85)', letterSpacing: 1.5 }}>RÉPUBLIQUE DE GUINÉE</div>
               <div style={{ fontSize: 11, fontWeight: 900, color: '#FCD116', letterSpacing: 0.5 }}>CARTE NATIONALE D'IDENTITÉ</div>
@@ -469,7 +489,7 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId }) => {
               <div style={{ flex: 1, background: '#FCD116' }}/>
               <div style={{ flex: 1, background: '#009A44' }}/>
             </div>
-            <div style={{ background: '#FCD116', color: '#006D44', fontSize: 8, fontWeight: 900, padding: '2px 6px', borderRadius: 3 }}>BIOMÉTRIQUE</div>
+            <div style={{ background: '#FCD116', color: '#9B1B5A', fontSize: 8, fontWeight: 900, padding: '2px 6px', borderRadius: 3 }}>BIOMÉTRIQUE</div>
           </div>
         </div>
 
@@ -477,7 +497,7 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId }) => {
         <div style={{ display: 'flex', padding: '12px 14px 10px', gap: 14, position: 'relative', zIndex: 1 }}>
           {/* Photo + empreinte */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
-            <div style={{ width: 88, height: 108, border: '2.5px solid #006D44', borderRadius: 4, overflow: 'hidden', background: '#c8dcc0', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}>
+            <div style={{ width: 88, height: 108, border: '2.5px solid #9B1B5A', borderRadius: 4, overflow: 'hidden', background: '#e8c0d4', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}>
               <img src={avatarURL} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" />
             </div>
             {/* Empreinte digitale */}
@@ -501,7 +521,7 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId }) => {
               <div key={i} style={{ display: 'grid', gridTemplateColumns: l2 ? '1fr 1fr' : '1fr', gap: '0 12px', marginBottom: 6, borderBottom: '1px solid rgba(0,109,68,0.15)', paddingBottom: 4 }}>
                 <div>
                   <div style={{ fontSize: 7, color: '#5a7a5a', fontStyle: 'italic', fontWeight: 600 }}>{l1}</div>
-                  <div style={{ fontSize: l1.includes('Nom') || l1.includes('Prénom') ? 13 : 10, fontWeight: l1.includes('Nom') || l1.includes('Prénom') ? 900 : 700, color: '#0a1a0a' }}>{v1}</div>
+                  <div style={{ fontSize: l1.includes('Nom') || l1.includes('Prénom') ? 13 : 10, fontWeight: l1.includes('Nom') || l1.includes('Prénom') ? 900 : 700, color: '#2a0a1a' }}>{v1}</div>
                 </div>
                 {l2 && (
                   <div>
@@ -522,7 +542,7 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId }) => {
             </div>
             {qrUrl && (
               <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 2, flexShrink: 0 }}>
-                <div style={{ background: '#fff', padding: 4, border: '1.5px solid #006D44', borderRadius: 4 }}>
+                <div style={{ background: '#fff', padding: 4, border: '1.5px solid #9B1B5A', borderRadius: 4 }}>
                   <img src={qrUrl} alt="QR Code" width={72} height={72} style={{ display: 'block' }} crossOrigin="anonymous" />
                 </div>
                 <div style={{ fontSize: 6.5, color: '#5a7a5a', textAlign: 'center', fontWeight: 600 }}>Scanner pour vérifier</div>
@@ -538,7 +558,7 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId }) => {
       {/* ── VERSO ── */}
       <div style={{
         background: VERSO_BG,
-        border: '2px solid #2d5a2d',
+        border: '2px solid #7a1547',
         borderRadius: 10,
         overflow: 'hidden',
         boxShadow: '0 4px 16px rgba(0,80,0,0.1)',
@@ -563,7 +583,7 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId }) => {
               const idLine2 = `${fmtDateUP(ddn).replace(/\s/g,'').slice(0,6) || '000000'}${genre}<${fmtDateUP(expire).replace(/\s/g,'').slice(0,6) || '000000'}GIN${nom.replace(/[^A-Z]/g,'<').padEnd(14,'<')}`;
               const idLine3 = `${nom.replace(/[^A-Z]/g,'<').padEnd(13,'<')}<${prenom.replace(/[^A-Z]/g,'<').padEnd(17,'<')}`;
               return ['IDGIN' + nin.slice(0,9) + '<' + nin.slice(9,15), idLine2, idLine3].map((l, i) => (
-                <div key={i} style={{ fontFamily: 'Courier New, monospace', fontSize: 10, color: '#69f0ae', letterSpacing: 2, lineHeight: 1.8 }}>{l.slice(0,30)}</div>
+                <div key={i} style={{ fontFamily: 'Courier New, monospace', fontSize: 10, color: '#f48fb1', letterSpacing: 2, lineHeight: 1.8 }}>{l.slice(0,30)}</div>
               ));
             })()}
           </div>
@@ -571,11 +591,11 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId }) => {
           {/* Infos complémentaires */}
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 9 }}>
             <div style={{ background: 'rgba(0,109,68,0.08)', padding: 8, borderRadius: 6, border: '1px solid rgba(0,109,68,0.2)' }}>
-              <div style={{ fontWeight: 700, color: '#006D44', marginBottom: 2 }}>Organe émetteur</div>
+              <div style={{ fontWeight: 700, color: '#9B1B5A', marginBottom: 2 }}>Organe émetteur</div>
               <div style={{ color: '#333' }}>Ministère de la Sécurité<br/>et de la Protection Civile<br/>(M.S.P.C) — République de Guinée</div>
             </div>
             <div style={{ background: 'rgba(0,109,68,0.08)', padding: 8, borderRadius: 6, border: '1px solid rgba(0,109,68,0.2)' }}>
-              <div style={{ fontWeight: 700, color: '#006D44', marginBottom: 2 }}>Validité</div>
+              <div style={{ fontWeight: 700, color: '#9B1B5A', marginBottom: 2 }}>Validité</div>
               <div style={{ color: '#333' }}>Valable dans tous les<br/>États membres de la CEDEAO<br/>et à l'international</div>
             </div>
           </div>
@@ -593,15 +613,7 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId }) => {
         <div style={{ height: 5, background: 'linear-gradient(90deg, #009A44 0%, #FCD116 25%, #CE1126 50%, #FCD116 75%, #009A44 100%)', opacity: 0.75 }} />
       </div>
 
-      {/* Notice vérification */}
-      {qrUrl && (
-        <div style={{ marginTop: 12, padding: '10px 14px', background: '#f0fdf4', border: '1px solid #b8d8b8', borderRadius: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Smartphone size={16} color="#006D44" style={{ flexShrink: 0 }} />
-          <p style={{ fontSize: 11, color: '#2d5a2d', margin: 0 }}>
-            <strong>Vérification tierce :</strong> Scannez le QR code (recto) pour authentifier ce document via le Registre National NaissanceChain en moins de 3 secondes.
-          </p>
-        </div>
-      )}
+      {/* QR vérification intégré dans le document */}
     </div>
   );
 };
@@ -680,8 +692,16 @@ const ActeNaissance = ({ acte, user, documentId }) => {
 
               {/* Centre : Titre */}
               <div style={{ textAlign: 'center' }}>
-                <div style={{ fontSize: 36, lineHeight: 1 }}>🦅</div>
-                <div style={{ fontSize: 9, letterSpacing: 1.5, color: DARK_GREEN, fontWeight: 700, marginTop: 4 }}>RÉPUBLIQUE DE GUINÉE</div>
+                {/* Armoiries République de Guinée */}
+                <svg width="52" height="52" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', margin:'0 auto 2px' }}>
+                  <circle cx="50" cy="50" r="47" fill="#f5f0ff" stroke={PURPLE} strokeWidth="2.5"/>
+                  <circle cx="50" cy="50" r="43" fill="none" stroke="rgba(92,45,130,0.2)" strokeWidth="0.5"/>
+                  <polygon points="50,20 55,36 72,36 59,46 63,63 50,53 37,63 41,46 28,36 45,36" fill={PURPLE}/>
+                  <rect x="22" y="72" width="18" height="12" rx="1" fill="#CE1126"/>
+                  <rect x="41" y="72" width="18" height="12" rx="1" fill="#FCD116"/>
+                  <rect x="60" y="72" width="18" height="12" rx="1" fill="#009A44"/>
+                </svg>
+                <div style={{ fontSize: 9, letterSpacing: 1.5, color: DARK_GREEN, fontWeight: 700, marginTop: 2 }}>RÉPUBLIQUE DE GUINÉE</div>
                 <div style={{ fontSize: 9, letterSpacing: 1, color: '#555', fontStyle: 'italic' }}>TRAVAIL · JUSTICE · SOLIDARITÉ</div>
                 <div style={{ marginTop: 8, fontSize: 22, fontWeight: 900, fontStyle: 'italic', color: '#1a0a2a', letterSpacing: 0.5, borderBottom: `2px solid ${PURPLE}`, paddingBottom: 4 }}>
                   Acte de Naissance
@@ -753,8 +773,9 @@ const ActeNaissance = ({ acte, user, documentId }) => {
                 </div>
               </div>
               <div style={{ fontSize: 8.5, color: '#555', fontStyle: 'italic', marginBottom: 14 }}>
-                Officier de l'État Civil Délégué · Habilité par ordonnance N° 92-027/PRG/SGG du 12 Mai 1992<br/>
-                Ce document a été généré automatiquement via le système NaissanceChain sans intervention humaine.
+                Officier de l'État Civil Délégué · Habilité par l'Ordonnance N° 92-027/PRG/SGG du 12 Mai 1992<br/>
+                Conforme à la Loi L/2015/013/AN du 6 Juillet 2015 relative à la modernisation de l'état civil en République de Guinée.<br/>
+                Document généré via le système NaissanceChain — Registre National Numérique.
               </div>
               <SignatureMinistere ministere="MATD" long={true} dark={false} />
             </div>
@@ -763,15 +784,7 @@ const ActeNaissance = ({ acte, user, documentId }) => {
         </div>
       </div>
 
-      {/* Notice */}
-      {qrUrl && (
-        <div style={{ marginTop: 12, padding: '10px 14px', background: '#f5eeff', border: `1px solid #c8a8e8`, borderRadius: 8, display: 'flex', alignItems: 'center', gap: 10 }}>
-          <Smartphone size={16} color={PURPLE} style={{ flexShrink: 0 }} />
-          <p style={{ fontSize: 11, color: '#3a1a5a', margin: 0 }}>
-            <strong>Authentification :</strong> Scannez le QR code (angle supérieur droit) pour vérifier cet acte via le Registre National NaissanceChain.
-          </p>
-        </div>
-      )}
+      {/* QR vérification intégré dans le document */}
     </div>
   );
 };
@@ -822,7 +835,13 @@ const PermisConduire = ({ acte, user, documentId }) => {
         {/* En-tête */}
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '10px 16px', position: 'relative', zIndex: 1 }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
-            <div style={{ fontSize: 28 }}>🦅</div>
+            <svg width="30" height="30" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+              <circle cx="50" cy="50" r="47" fill="rgba(255,255,255,0.15)" stroke="#FCD116" strokeWidth="2"/>
+              <polygon points="50,20 55,36 72,36 59,46 63,63 50,53 37,63 41,46 28,36 45,36" fill="#FCD116"/>
+              <rect x="22" y="74" width="18" height="11" rx="1" fill="#CE1126"/>
+              <rect x="41" y="74" width="18" height="11" rx="1" fill="#FCD116"/>
+              <rect x="60" y="74" width="18" height="11" rx="1" fill="#009A44"/>
+            </svg>
             <div>
               <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: 1.5 }}>RÉPUBLIQUE DE GUINÉE</div>
               <div style={{ fontSize: 13, fontWeight: 900, color: '#FCD116', letterSpacing: 1 }}>PERMIS DE CONDUIRE</div>
@@ -917,12 +936,7 @@ const PermisConduire = ({ acte, user, documentId }) => {
             </div>
           </div>
 
-          {qrUrl && (
-            <div style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '6px 10px', background: '#f0fff0', border: '1px solid #b8d8b8', borderRadius: 6 }}>
-              <Smartphone size={14} color="#2d5a1a" />
-              <span style={{ fontSize: 10, color: '#2d5a1a', fontWeight: 600 }}>Scanner le QR code (recto) pour vérifier l'authenticité via NaissanceChain</span>
-            </div>
-          )}
+          {/* QR vérification intégré dans le document */}
         </div>
 
         <div style={{ height: 5, background: 'linear-gradient(90deg, #009A44 0%, #FCD116 25%, #CE1126 50%, #FCD116 75%, #009A44 100%)', opacity: 0.7 }} />
@@ -958,18 +972,32 @@ const DocumentGenere = () => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Charger le document certifié
+        // 1. Charger le document certifié (par ID ou dernier doc du user)
+        let docData = null;
         if (documentId) {
-          const { data: docData } = await supabase
+          const { data } = await supabase
             .from('documents_certifies')
             .select('*')
             .eq('id', documentId)
             .maybeSingle();
-          if (docData) setDoc(docData);
+          docData = data;
+        } else if (user?.id) {
+          // Fallback : prendre le dernier document généré du citoyen
+          const { data } = await supabase
+            .from('documents_certifies')
+            .select('*')
+            .eq('citoyen_id', user.id)
+            .eq('statut', 'GENERE')
+            .order('date_generation', { ascending: false })
+            .limit(1)
+            .maybeSingle();
+          docData = data;
         }
+        if (docData) setDoc(docData);
 
-        // Charger les données NaissanceChain
-        const idActe = user?.id_acte_lie || user?.matricule;
+        // 2. Charger les données NaissanceChain (acte de naissance)
+        const idActe = user?.id_acte_lie || user?.matricule
+          || docData?.id_acte;
         if (idActe) {
           const { data: acteData } = await supabase
             .from('naissancechain')
@@ -1057,41 +1085,42 @@ const DocumentGenere = () => {
               {pdfLoading ? 'Génération...' : 'Télécharger PDF'}
             </button>
             <button
-              onClick={() => window.print()}
+              onClick={() => {
+                // Préparer l'impression : isoler le document
+                const zone = document.getElementById('doc-print-zone');
+                if (zone) {
+                  const clone = zone.cloneNode(true);
+                  clone.id = 'doc-print-clone';
+                  clone.style.cssText = 'position:fixed;top:0;left:0;width:100%;z-index:999999;background:white;padding:16px;box-sizing:border-box;';
+                  document.body.appendChild(clone);
+                  // Masquer le reste
+                  document.body.style.overflow = 'hidden';
+                  window.print();
+                  // Nettoyer après impression
+                  setTimeout(() => {
+                    document.body.removeChild(clone);
+                    document.body.style.overflow = '';
+                  }, 1000);
+                } else {
+                  window.print();
+                }
+              }}
               style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', background: '#fff', color: '#006D44', border: '2px solid #006D44', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
             >
               <Printer size={15} /> Imprimer
             </button>
-            {verifyUrl && (
-              <button
-                onClick={() => window.open(verifyUrl, '_blank')}
-                style={{ display: 'flex', alignItems: 'center', gap: 8, padding: '10px 16px', background: '#f0fdf4', color: '#006D44', border: '1.5px solid #b8d8b8', borderRadius: 10, fontSize: 13, fontWeight: 700, cursor: 'pointer', fontFamily: 'inherit' }}
-              >
-                <CheckCircle size={15} /> Vérifier
-              </button>
-            )}
+            {/* bouton vérifier retiré - vérification via QR code uniquement */}
           </div>
         </div>
 
         {/* ── Document ── */}
-        <div ref={docRef} style={{ background: '#fff', borderRadius: 12, padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #f0f0f0' }}>
+        <div ref={docRef} id="doc-print-zone" style={{ background: '#fff', borderRadius: 12, padding: '24px', boxShadow: '0 4px 20px rgba(0,0,0,0.06)', border: '1px solid #f0f0f0' }}>
           <ErrorBoundary>
             {renderDocument()}
           </ErrorBoundary>
         </div>
 
-        {/* Infos vérification */}
-        {documentId && (
-          <div style={{ marginTop: 16, padding: '14px 18px', background: '#f8f9fa', border: '1px solid #e5e7eb', borderRadius: 10 }}>
-            <div style={{ fontSize: 12, fontWeight: 700, color: '#333', marginBottom: 6 }}>🔗 URL de vérification publique (NaissanceChain)</div>
-            <div style={{ fontSize: 11, fontFamily: 'monospace', color: '#006D44', wordBreak: 'break-all', background: '#fff', padding: '8px 12px', borderRadius: 6, border: '1px solid #e5e7eb' }}>
-              {verifyUrl}
-            </div>
-            <div style={{ fontSize: 11, color: '#888', marginTop: 6 }}>
-              Ce lien est encodé dans le QR code du document. Toute organisation tierce peut scanner le QR code pour vérifier l'authenticité en moins de 3 secondes.
-            </div>
-          </div>
-        )}
+        {/* URL de vérification encodée dans le QR code du document uniquement */}
 
         {/* Navigation */}
         <div style={{ display: 'flex', gap: 12, marginTop: 20, flexWrap: 'wrap' }}>
@@ -1106,9 +1135,49 @@ const DocumentGenere = () => {
 
       <style>{`
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        /* Masquer le clone hors impression */
+        #doc-print-clone { display: none; }
+
         @media print {
-          .layout-sidebar, .layout-header, button { display: none !important; }
-          body { background: white; }
+          /* Masquer toute l'interface sauf le document */
+          .layout-sidebar,
+          .layout-header,
+          .layout-main > *:not(#doc-print-zone),
+          button,
+          nav,
+          [class*="sidebar"],
+          [class*="header"],
+          [class*="Sidebar"],
+          [class*="Header"] {
+            display: none !important;
+          }
+          /* Forcer le document à remplir la page */
+          html, body {
+            margin: 0 !important;
+            padding: 0 !important;
+            background: white !important;
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
+          /* Zone d'impression */
+          #doc-print-zone,
+          #doc-print-clone {
+            display: block !important;
+            position: fixed !important;
+            top: 0 !important;
+            left: 0 !important;
+            width: 100% !important;
+            z-index: 99999 !important;
+            background: white !important;
+            margin: 0 !important;
+            padding: 16px !important;
+            box-sizing: border-box !important;
+          }
+          /* Forcer toutes les couleurs d'arrière-plan à s'imprimer */
+          * {
+            -webkit-print-color-adjust: exact !important;
+            print-color-adjust: exact !important;
+          }
         }
       `}</style>
     </Layout>

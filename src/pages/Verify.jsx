@@ -229,7 +229,7 @@ const Verify = () => {
           </div>
 
           <div style={{ fontSize: 12, color: '#888', marginBottom: 20 }}>
-            En cas de doute, contactez le Ministère de la Justice :<br/>
+            En cas de doute, contactez le Ministère de l'Administration Territoriale et de la Décentralisation (MATD) :<br/>
             <strong style={{ color: '#CE1126' }}>+224 655 00 00 00</strong> ou <strong style={{ color: '#CE1126' }}>support@identiguinee.gn</strong>
           </div>
 
@@ -330,7 +330,7 @@ const Verify = () => {
                 <span style={{ fontSize: 16 }}>🇬🇳</span>
                 <span style={{ fontSize: 11, fontWeight: 800, color: '#006D44' }}>RÉPUBLIQUE DE GUINÉE</span>
               </div>
-              <div style={{ fontSize: 10, color: '#666' }}>Ministère de la Justice — DGAE</div>
+              <div style={{ fontSize: 10, color: '#666' }}>Ministère de l'Administration Territoriale et de la Décentralisation (MATD) — DGAE</div>
               <div style={{ fontSize: 9, color: '#888', marginTop: 2 }}>Certifié via NaissanceChain v2.0</div>
             </div>
             <div style={{ textAlign: 'right' }}>

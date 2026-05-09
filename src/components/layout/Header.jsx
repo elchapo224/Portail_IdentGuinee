@@ -29,8 +29,13 @@ const Header = ({ onMenuClick }) => {
       </button>
 
       {/* Logo mobile */}
-      <span className="header-logo-mobile" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer' }}>
-        Identi<em>Guinée</em>
+      <span className="header-logo-mobile" onClick={() => navigate('/dashboard')} style={{ cursor: 'pointer', display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div style={{ display: 'flex', height: 14, width: 22, borderRadius: 2, overflow: 'hidden', flexShrink: 0 }}>
+          <div style={{ flex: 1, background: '#CE1126' }}/>
+          <div style={{ flex: 1, background: '#FCD116' }}/>
+          <div style={{ flex: 1, background: '#009A44' }}/>
+        </div>
+        <span>Identi<em>Guinée</em></span>
       </span>
 
       {/* Actions droite */}

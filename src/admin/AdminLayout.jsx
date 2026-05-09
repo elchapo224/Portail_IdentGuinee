@@ -60,6 +60,12 @@ const AdminLayout = ({ children }) => {
           <span style={{ fontSize: 20, fontWeight: 800, color: 'var(--text-heading)', display: 'block', letterSpacing: '-0.3px' }}>
             Identi<span style={{ color: 'var(--primary)' }}>Guinée</span>
           </span>
+          {/* Drapeau tricolore */}
+          <div style={{ display: 'flex', height: 3, borderRadius: 2, overflow: 'hidden', marginTop: 4, width: '80%' }}>
+            <div style={{ flex: 1, background: '#CE1126' }}/>
+            <div style={{ flex: 1, background: '#FCD116' }}/>
+            <div style={{ flex: 1, background: '#009A44' }}/>
+          </div>
           <span style={{ fontSize: 'var(--text-xs)', fontWeight: 700, color: '#fff', background: 'var(--primary)', borderRadius: 4, padding: '2px 8px', marginTop: 4, display: 'inline-block' }}>
             Administration
           </span>

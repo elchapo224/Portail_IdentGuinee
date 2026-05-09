@@ -64,7 +64,20 @@ const Verifier = () => {
     return (
       <div style={{ minHeight:'100vh', background:'linear-gradient(135deg,#f0fdf4,#e8f5e8)', display:'flex', alignItems:'center', justifyContent:'center', padding:24, fontFamily:'Arial,sans-serif' }}>
         <div style={{ textAlign:'center', maxWidth:360 }}>
-          <div style={{ fontSize:18, fontWeight:900, color:'#0a2e1a', marginBottom:20 }}>Identi<span style={{ color:'#006D44' }}>Guinée</span></div>
+          {/* En-tête officiel */}
+          <div style={{ marginBottom: 20 }}>
+            <div style={{ display:'flex', alignItems:'center', justifyContent:'center', gap:10, marginBottom:6 }}>
+              <div style={{ display:'flex', height:14, width:24, borderRadius:2, overflow:'hidden' }}>
+                <div style={{ flex:1, background:'#CE1126' }}/><div style={{ flex:1, background:'#FCD116' }}/><div style={{ flex:1, background:'#009A44' }}/>
+              </div>
+              <div style={{ fontSize:10, fontWeight:800, color:'#444', letterSpacing:1, textTransform:'uppercase' }}>République de Guinée</div>
+              <div style={{ display:'flex', height:14, width:24, borderRadius:2, overflow:'hidden' }}>
+                <div style={{ flex:1, background:'#CE1126' }}/><div style={{ flex:1, background:'#FCD116' }}/><div style={{ flex:1, background:'#009A44' }}/>
+              </div>
+            </div>
+            <div style={{ fontSize:18, fontWeight:900, color:'#0a2e1a' }}>Identi<span style={{ color:'#006D44' }}>Guinée</span></div>
+            <div style={{ fontSize:9, color:'#888', letterSpacing:1, textTransform:'uppercase' }}>Travail · Justice · Solidarité</div>
+          </div>
           <Shield size={48} color="#006D44" style={{ marginBottom:16 }} />
           <h2 style={{ fontSize:18, fontWeight:800, color:'#0a2e1a', margin:'0 0 8px' }}>Vérification en cours...</h2>
           <p style={{ fontSize:12, color:'#555', margin:'0 0 16px' }}>Consultation NaissanceChain — Acte N° {id}</p>
@@ -139,6 +152,15 @@ const Verifier = () => {
             </div>
             <div style={{ background:'#006D44', color:'#fff', padding:'6px 20px', borderRadius:20, fontSize:12, fontWeight:800, letterSpacing:1.5, display:'inline-block', marginBottom:12 }}>
               ✓ DOCUMENT AUTHENTIQUE
+            </div>
+            {/* Badge officiel */}
+            <div style={{ display:'flex', justifyContent:'center', marginBottom:8 }}>
+              <div style={{ display:'flex', alignItems:'center', gap:8, background:'#f0fdf4', border:'1px solid #bbf7d0', borderRadius:20, padding:'4px 12px' }}>
+                <div style={{ display:'flex', height:10, width:18, borderRadius:1, overflow:'hidden' }}>
+                  <div style={{ flex:1, background:'#CE1126' }}/><div style={{ flex:1, background:'#FCD116' }}/><div style={{ flex:1, background:'#009A44' }}/>
+                </div>
+                <span style={{ fontSize:9, fontWeight:800, color:'#166534', letterSpacing:1 }}>REGISTRE NATIONAL — NAISSANCECHAIN</span>
+              </div>
             </div>
             <h1 style={{ fontSize:20, fontWeight:800, color:'#0a2e1a', margin:'0 0 6px' }}>Vérification réussie</h1>
             <p style={{ fontSize:13, color:'#555', margin:0, lineHeight:1.6 }}>

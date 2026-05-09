@@ -6,6 +6,7 @@ import {
   Users, FileText, CheckCircle, ArrowRight, Clock
 } from 'lucide-react';
 import { supabase } from '../lib/supabase';
+import { GuineaCoatOfArms } from '../lib/guineaCoatOfArms';
 import {
   verifyAdminCredentials,
   verifyAdminSecret,
@@ -154,22 +155,41 @@ const Login = () => {
       {/* ── Panneau gauche ── */}
       <div className="login-visual">
         <div className="login-visual-logo">
-          <div className="login-visual-logo-icon">
-            <Shield size={28} color="#fff" />
+          <div className="login-visual-logo-icon" style={{ background: 'rgba(255,255,255,0.15)', border: '2px solid rgba(255,255,255,0.3)' }}>
+            <GuineaCoatOfArms size={38} />
           </div>
           <div>
+            <div style={{ fontSize: 8, fontWeight: 700, color: 'rgba(255,255,255,0.7)', letterSpacing: 2, textTransform: 'uppercase', marginBottom: 2 }}>
+              République de Guinée
+            </div>
             <h1>Identi<span>Guinée</span></h1>
-            <p className="login-visual-tagline">Identité Numérique Nationale</p>
+            <p className="login-visual-tagline">Travail · Justice · Solidarité</p>
           </div>
+        </div>
+        {/* Drapeau tricolore horizontal */}
+        <div style={{ display: 'flex', width: 80, height: 6, borderRadius: 3, overflow: 'hidden', marginBottom: 24, marginTop: -8, position: 'relative', zIndex: 1 }}>
+          <div style={{ flex: 1, background: '#CE1126' }}/>
+          <div style={{ flex: 1, background: '#FCD116' }}/>
+          <div style={{ flex: 1, background: '#009A44' }}/>
         </div>
 
         <div style={{ position: 'relative', zIndex: 1 }}>
           <p style={{ fontSize: 32, fontWeight: 900, color: '#fff', lineHeight: 1.2, marginBottom: 16, letterSpacing: -1 }}>
             L'identité de<br /><span style={{ color: '#FCD116' }}>chaque citoyen</span>,<br />sécurisée.
           </p>
-          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, marginBottom: 48 }}>
-            Plateforme officielle de gestion d'identité numérique de la République de Guinée. Vos documents certifiés, sans corruption.
+          <p style={{ fontSize: 14, color: 'rgba(255,255,255,0.65)', lineHeight: 1.6, marginBottom: 36 }}>
+            Plateforme officielle de gestion d'identité numérique de la République de Guinée. Vos documents certifiés via NaissanceChain, sans corruption, accessibles partout.
           </p>
+          {/* Badge officiel */}
+          <div style={{ display: 'flex', alignItems: 'center', gap: 10, background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: 10, padding: '10px 14px', marginBottom: 24 }}>
+            <div style={{ display: 'flex', height: 20, width: 30, borderRadius: 3, overflow: 'hidden', flexShrink: 0, boxShadow: '0 1px 4px rgba(0,0,0,0.3)' }}>
+              <div style={{ flex:1, background:'#CE1126' }}/><div style={{ flex:1, background:'#FCD116' }}/><div style={{ flex:1, background:'#009A44' }}/>
+            </div>
+            <div>
+              <div style={{ fontSize: 10, fontWeight: 800, color: '#FCD116', letterSpacing: 0.5 }}>PROJET GN-02 · MIABE HACKATHON 2026</div>
+              <div style={{ fontSize: 10, color: 'rgba(255,255,255,0.6)' }}>Équipe Commit United — Phase Finale</div>
+            </div>
+          </div>
         </div>
 
         <div className="login-visual-stats">
