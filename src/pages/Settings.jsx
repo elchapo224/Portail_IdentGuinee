@@ -189,7 +189,7 @@ const Settings = () => {
                 <form onSubmit={handleSave}>
                   <div className="input-group-row">
                     <div className="input-field">
-                      <label><User size={14} /> PRÉNOM</label>
+                      <label htmlFor="field-prenom"><User size={14} /> PRÉNOM</label>
                       <input
                         type="text"
                         value={formData.prenom}
@@ -198,7 +198,7 @@ const Settings = () => {
                       />
                     </div>
                     <div className="input-field">
-                      <label><User size={14} /> NOM</label>
+                      <label htmlFor="field-nom"><User size={14} /> NOM</label>
                       <input
                         type="text"
                         value={formData.nom}
@@ -210,7 +210,7 @@ const Settings = () => {
 
                   <div className="input-group-row">
                     <div className="input-field" style={{ width: '100%' }}>
-                      <label><Mail size={14} /> EMAIL</label>
+                      <label htmlFor="field-email-settings"><Mail size={14} /> EMAIL</label>
                       <input
                         type="email"
                         value={formData.email}
@@ -222,7 +222,7 @@ const Settings = () => {
 
                   <div className="input-group-row">
                     <div className="input-field" style={{ width: '100%' }}>
-                      <label><Phone size={14} /> TÉLÉPHONE</label>
+                      <label htmlFor="field-telephone"><Phone size={14} /> TÉLÉPHONE</label>
                       <input
                         type="text"
                         placeholder="Ex: +224 620 00 00 00"
@@ -234,7 +234,7 @@ const Settings = () => {
 
                   <div className="input-group-row">
                     <div className="input-field" style={{ width: '100%' }}>
-                      <label><MapPin size={14} /> ADRESSE</label>
+                      <label htmlFor="field-adresse"><MapPin size={14} /> ADRESSE</label>
                       <input
                         type="text"
                         placeholder="Quartier, Commune, Ville"
@@ -246,7 +246,7 @@ const Settings = () => {
 
                   <div className="input-group-row">
                     <div className="input-field" style={{ width: '100%' }}>
-                      <label><Calendar size={14} /> DATE DE NAISSANCE</label>
+                      <label htmlFor="field-ddn"><Calendar size={14} /> DATE DE NAISSANCE</label>
                       <input
                         type="date"
                         value={formData.date_naissance}
@@ -257,14 +257,14 @@ const Settings = () => {
 
                   <div className="input-group-row">
                     <div className="input-field" style={{ width: '100%' }}>
-                      <label><Upload size={14} /> PHOTO DE PROFIL</label>
-                      <input type="file" accept="image/*" onChange={handleAvatarChange} />
+                      <label htmlFor="field-avatar"><Upload size={14} /> PHOTO DE PROFIL</label>
+                      <input id="field-avatar" name="avatar" type="file" accept="image/*" onChange={handleAvatarChange} />
                     </div>
                   </div>
 
                   <div className="input-group-row">
                     <div className="input-field">
-                      <label><Lock size={14} /> MOT DE PASSE ACTUEL</label>
+                      <label htmlFor="field-password"><Lock size={14} /> MOT DE PASSE ACTUEL</label>
                       <input
                         type="password"
                         placeholder="Requis pour modifier le mot de passe"
@@ -273,7 +273,7 @@ const Settings = () => {
                       />
                     </div>
                     <div className="input-field">
-                      <label><Lock size={14} /> NOUVEAU MOT DE PASSE</label>
+                      <label htmlFor="field-password"><Lock size={14} /> NOUVEAU MOT DE PASSE</label>
                       <input
                         type="password"
                         placeholder="Laisser vide pour conserver l'actuel"

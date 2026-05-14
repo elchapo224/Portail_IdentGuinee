@@ -248,7 +248,7 @@ const Login = () => {
             {mode === 'login' && (
               <>
                 <div className="field-group">
-                  <label className="field-label">Identifiant</label>
+                  <label htmlFor="field-identifiant" className="field-label">Identifiant</label>
                   <div className="field-input-wrap">
                     <Mail size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#aaa', pointerEvents: 'none' }} />
                     <input
@@ -263,7 +263,7 @@ const Login = () => {
                   </div>
                 </div>
                 <div className="field-group">
-                  <label className="field-label">Mot de passe</label>
+                  <label htmlFor="field-password" className="field-label">Mot de passe</label>
                   <div className="field-input-wrap">
                     <Lock size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#aaa', pointerEvents: 'none' }} />
                     <input
@@ -286,7 +286,7 @@ const Login = () => {
             {/* CLÉ SECRÈTE ADMIN */}
             {mode === 'admin_secret' && (
               <div className="field-group">
-                <label className="field-label">Clé d'accès confidentielle</label>
+                <label htmlFor="field-cle-acces" className="field-label">Clé d'accès confidentielle</label>
                 <div className="field-input-wrap">
                   <Lock size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#aaa', pointerEvents: 'none' }} />
                   <input
@@ -309,7 +309,7 @@ const Login = () => {
             {mode === 'register' && (
               <>
                 <div className="field-group">
-                  <label className="field-label">Numéro d'acte de naissance <span style={{ color: '#CE1126' }}>*</span></label>
+                  <label htmlFor="field-num-acte" className="field-label">Numéro d'acte de naissance <span style={{ color: '#CE1126' }}>*</span></label>
                   <div className="field-input-wrap">
                     <FileText size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#aaa', pointerEvents: 'none' }} />
                     <input
@@ -324,21 +324,21 @@ const Login = () => {
                   <p className="field-hint">Ce numéro figure sur votre acte de naissance papier.</p>
                 </div>
                 <div className="field-group">
-                  <label className="field-label">Adresse email</label>
+                  <label htmlFor="field-email" className="field-label">Adresse email</label>
                   <div className="field-input-wrap">
                     <Mail size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#aaa', pointerEvents: 'none' }} />
                     <input className="field-input" style={{ paddingLeft: 38 }} type="email" placeholder="votre@email.com" value={form.email} onChange={e => set('email', e.target.value)} />
                   </div>
                 </div>
                 <div className="field-group">
-                  <label className="field-label">Téléphone</label>
+                  <label htmlFor="field-telephone" className="field-label">Téléphone</label>
                   <div className="field-input-wrap">
                     <Mail size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#aaa', pointerEvents: 'none' }} />
                     <input className="field-input" style={{ paddingLeft: 38 }} type="tel" placeholder="+224 6XX XXX XXX" value={form.telephone} onChange={e => set('telephone', e.target.value)} />
                   </div>
                 </div>
                 <div className="field-group">
-                  <label className="field-label">Mot de passe <span style={{ color: '#CE1126' }}>*</span></label>
+                  <label htmlFor="field-password" className="field-label">Mot de passe <span style={{ color: '#CE1126' }}>*</span></label>
                   <div className="field-input-wrap">
                     <Lock size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#aaa', pointerEvents: 'none' }} />
                     <input
@@ -355,7 +355,7 @@ const Login = () => {
                   </div>
                 </div>
                 <div className="field-group">
-                  <label className="field-label">Confirmer le mot de passe</label>
+                  <label htmlFor="field-password" className="field-label">Confirmer le mot de passe</label>
                   <div className="field-input-wrap">
                     <Lock size={15} style={{ position: 'absolute', left: 13, top: '50%', transform: 'translateY(-50%)', color: '#aaa', pointerEvents: 'none' }} />
                     <input

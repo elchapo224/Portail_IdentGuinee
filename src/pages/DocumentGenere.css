@@ -459,17 +459,195 @@
   .cni-card, .passport-wrap, .acte-outer, .permis-wrap { max-width: 100% !important; }
 }
 
-/* ── RESPONSIVE ── */
+/* ═══════════════════════════════════════════════════════
+   RESPONSIVE — Android / Mobile (toutes tailles)
+═══════════════════════════════════════════════════════ */
+
+/* Zone doc : scroll horizontal si besoin */
+.doc-print-zone {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  box-sizing: border-box;
+  width: 100%;
+}
+
+/* ════════════════════════════════════
+   BREAKPOINT 640px (petites tablettes)
+════════════════════════════════════ */
 @media (max-width: 640px) {
-  .doc-print-zone { padding: 14px; }
-  .cni-body-row { flex-wrap: wrap; }
-  .cni-photo-section { width: 80px; }
-  .cni-photo-frame { width: 72px; height: 88px; }
-  .cni-thumb-col { width: 52px; }
-  .cni-verso-geo-grid { grid-template-columns: 1fr 1fr; }
-  .passport-bio-section { flex-direction: column; }
-  .passport-bio-row.two { flex-direction: column; gap: 8px; }
-  .acte-loc-header { grid-template-columns: 1fr; }
-  .acte-loc-cell.border-r { border-right: none; border-bottom: 1px solid #9B4DB0; }
-  .permis-body { flex-wrap: wrap; }
+  .doc-print-zone { padding: 12px 8px; }
+
+  /* ── ACTE DE NAISSANCE ── */
+  .acte-content-pad { padding: 12px 10px !important; }
+
+  /* En-tête : passer en mode flexible colonne */
+  .acte-header-grid {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: center !important;
+    gap: 10px !important;
+  }
+  .acte-hdr-left  { order: 2; width: 100%; text-align: left; font-size: 8px !important; }
+  .acte-hdr-centre { order: 1; width: 100%; }
+  .acte-hdr-right { order: 3; width: 100%; text-align: left !important; font-size: 8px !important; }
+
+  /* QR code : aligner à gauche sur mobile */
+  .acte-qr-zone { align-items: flex-start !important; }
+
+  /* Lignes de données : colonne label + valeur compacte */
+  .acte-row-inner {
+    grid-template-columns: minmax(0, 110px) 1fr !important;
+  }
+
+  /* Lignes double (label2/value2) : empiler les 2 blocs */
+  .acte-row-double {
+    grid-template-columns: 1fr !important;
+  }
+  .acte-row-double .acte-row-inner {
+    border-right: none !important;
+    border-bottom: 1px solid #d0b8e8;
+  }
+  .acte-row-double .acte-row-inner:last-child {
+    border-bottom: none;
+  }
+
+  /* ── CNI ── */
+  .cni-card { gap: 16px; }
+  .cni-body-row { flex-wrap: wrap; gap: 8px; padding: 10px !important; }
+  .cni-photo-section { width: 80px; flex-shrink: 0; }
+  .cni-photo-frame { width: 70px; height: 86px; }
+  .cni-data-section { padding: 0 6px !important; }
+  .cni-field-value { font-size: 9px !important; }
+  .cni-field-value.large { font-size: 11px !important; }
+  .cni-field-value.mono { font-size: 8.5px !important; }
+  .cni-thumb-col { width: 50px; }
+  .cni-thumb-box { width: 44px; height: 56px; }
+  .cni-verso-geo-grid { grid-template-columns: 1fr 1fr; gap: 8px; }
+  .cni-mrz-line { font-size: 7.5px !important; letter-spacing: 0.5px !important; overflow-x: auto; }
+  .cni-republic-name { font-size: 11px !important; }
+
+  /* ── PASSEPORT ── */
+  .passport-wrap { font-size: 9px; }
+  .passport-bio-section { flex-direction: column !important; }
+  .passport-bio-row { flex-direction: column !important; gap: 6px !important; }
+  .passport-mrz-line {
+    font-size: 7.5px !important;
+    letter-spacing: 0.5px !important;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+
+  /* ── PERMIS ── */
+  .permis-body-row { flex-direction: column !important; gap: 10px !important; padding: 0 10px 10px !important; }
+  .permis-cats-grid { grid-template-columns: repeat(3, 1fr) !important; }
+
+  /* ── LOCALISATION HEADER (Permis/autres) ── */
+  .acte-loc-header { grid-template-columns: 1fr !important; }
+  .acte-loc-cell.border-r { border-right: none !important; border-bottom: 1px solid #9B4DB0; }
+}
+
+/* ════════════════════════════════════
+   BREAKPOINT 480px (Android courant)
+   Galaxy A, Redmi, Moto G, etc.
+════════════════════════════════════ */
+@media (max-width: 480px) {
+  .doc-print-zone { padding: 8px 6px; }
+
+  /* ── ACTE DE NAISSANCE ── */
+  .acte-content-pad { padding: 10px 8px !important; }
+
+  /* Label encore plus compact */
+  .acte-row-inner {
+    grid-template-columns: minmax(0, 90px) 1fr !important;
+  }
+  .acte-row-inner > div:first-child {
+    font-size: 7.5px !important;
+    padding: 3px 5px !important;
+  }
+  .acte-row-inner > div:last-child {
+    font-size: 9.5px !important;
+    padding: 3px 6px !important;
+  }
+
+  /* Titre Acte de Naissance un peu plus petit */
+  .acte-hdr-centre > div:nth-child(3) { font-size: 18px !important; }
+
+  /* ── CNI ── */
+  .cni-body-row { padding: 8px !important; }
+  .cni-photo-section { width: 70px; }
+  .cni-photo-frame { width: 62px; height: 76px; }
+  .cni-data-section { padding: 0 4px !important; }
+  .cni-field-label { font-size: 6.5px !important; }
+  .cni-field-value { font-size: 8.5px !important; }
+  .cni-field-value.large { font-size: 10px !important; }
+  .cni-thumb-col { width: 44px; }
+  .cni-thumb-box { width: 38px; height: 48px; }
+  .cni-header-bar { padding: 7px 10px !important; }
+  .cni-republic-name { font-size: 10px !important; }
+  .cni-mrz-line { font-size: 7px !important; letter-spacing: 0.2px !important; }
+
+  /* ── PASSEPORT ── */
+  .passport-cover-band { font-size: 7px !important; padding: 6px 10px !important; }
+  .passport-republic-txt { font-size: 11px !important; }
+  .passport-header-bar { padding: 8px 12px !important; }
+  .passport-mrz-line { font-size: 7px !important; letter-spacing: 0.2px !important; }
+
+  /* ── PERMIS ── */
+  .permis-cats-grid { grid-template-columns: repeat(3, 1fr) !important; gap: 4px !important; }
+  .permis-body-row { padding: 0 8px 10px !important; }
+}
+
+/* ════════════════════════════════════
+   BREAKPOINT 380px (iPhone SE, Galaxy S mini)
+════════════════════════════════════ */
+@media (max-width: 380px) {
+  .doc-top-bar { flex-direction: column; gap: 8px; }
+  .doc-actions-row { flex-wrap: wrap; gap: 6px; }
+  .doc-btn-primary, .doc-btn-secondary { padding: 8px 12px; font-size: 12px; }
+
+  /* ── ACTE : label au-dessus de la valeur ── */
+  .acte-row-inner {
+    grid-template-columns: 1fr !important;
+  }
+  .acte-row-inner > div:first-child {
+    border-right: none !important;
+    border-bottom: 1px solid #d0b8e8 !important;
+    font-size: 7px !important;
+    padding: 2px 6px !important;
+    background: #f5eeff !important;
+  }
+  .acte-row-inner > div:last-child {
+    font-size: 9px !important;
+    padding: 3px 6px !important;
+  }
+
+  /* ── CNI : photo + données sur 2 lignes ── */
+  .cni-body-row { flex-direction: column; align-items: center; }
+  .cni-photo-section { width: 100% !important; flex-direction: row !important; gap: 12px; align-items: flex-start; }
+  .cni-data-section { width: 100% !important; padding: 0 !important; }
+  .cni-two-col { flex-direction: column; gap: 4px; }
+  .cni-thumb-col { display: none !important; }
+
+  /* ── PASSEPORT ── */
+  .passport-mrz-line { font-size: 6px !important; letter-spacing: 0 !important; }
+}
+
+/* ════════════════════════════════════
+   IMPRESSION : restaurer le layout PC
+════════════════════════════════════ */
+@media print {
+  .acte-header-grid {
+    display: grid !important;
+    grid-template-columns: 1fr auto 1fr !important;
+    flex-direction: unset !important;
+  }
+  .acte-hdr-left  { order: unset !important; }
+  .acte-hdr-centre { order: unset !important; }
+  .acte-hdr-right { order: unset !important; text-align: right !important; }
+  .acte-row-double { grid-template-columns: 1fr 1fr !important; }
+  .acte-row-double .acte-row-inner { border-right: 1px solid #d0b8e8 !important; border-bottom: none !important; }
+  .acte-row-inner { grid-template-columns: 140px 1fr !important; }
+  .permis-body-row { flex-direction: row !important; }
+  .cni-body-row { flex-wrap: nowrap !important; }
+  .cni-thumb-col { display: flex !important; }
 }

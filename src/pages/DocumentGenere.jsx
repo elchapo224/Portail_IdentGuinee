@@ -71,6 +71,17 @@ const buildQrUrl = (docId, hashId = null, size = 120) => {
   return `https://api.qrserver.com/v1/create-qr-code/?size=${size}x${size}&ecc=M&data=${encodeURIComponent(verifyUrl)}`;
 };
 
+
+// ── Avatar local (pas de requête externe = zéro CORS) ──────────────────────
+const generateAvatarSVG = (initials, bg = '#1a3a20') => {
+  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200" viewBox="0 0 200 200">
+    <rect width="200" height="200" fill="${bg}" rx="4"/>
+    <text x="100" y="130" font-family="Arial,sans-serif" font-size="88" font-weight="bold"
+      fill="#ffffff" text-anchor="middle">${initials}</text>
+  </svg>`;
+  return 'data:image/svg+xml;charset=utf-8,' + encodeURIComponent(svg);
+};
+
 // MRZ generator (ICAO 9303 simplifié)
 const buildMRZ = (nom, prenom, ddn, expire, numDoc, genre) => {
   const pad = (s, n, c = '<') => (s + c.repeat(n)).slice(0, n);
@@ -246,7 +257,7 @@ const PasseportBiometrique = ({ acte, user, documentId, hash_document }) => {
   const expire = new Date(); expire.setFullYear(expire.getFullYear() + 5);
   const qrUrl  = documentId ? buildQrUrl(documentId, hash_document, 130) : null;
   const mrz    = buildMRZ(nom, prenom, ddn, expire.toISOString(), numPass, genre);
-  const avatarURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(prenom.charAt(0)+' '+nom.charAt(0))}&background=1a3a20&color=fff&bold=true&size=200`;
+  const avatarURL = generateAvatarSVG(prenom.charAt(0).toUpperCase() + nom.charAt(0).toUpperCase(), '#1a3a20');
 
   const Field = ({ label, value, labelEn }) => (
     <div style={{ marginBottom: 10 }}>
@@ -335,7 +346,7 @@ const PasseportBiometrique = ({ acte, user, documentId, hash_document }) => {
               position: 'relative',
               boxShadow: '0 4px 12px rgba(0,0,0,0.15)',
             }}>
-              <img src={avatarURL} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" />
+              <img src={avatarURL} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
               {/* Coin holographique */}
               <div style={{ position: 'absolute', bottom: 0, right: 0, width: 30, height: 30, background: 'linear-gradient(135deg, transparent 50%, rgba(0,109,68,0.4) 50%)', opacity: 0.7 }} />
             </div>
@@ -435,7 +446,7 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId, hash_document }) => {
   const emis   = new Date();
   const expire = new Date(); expire.setFullYear(expire.getFullYear() + 10);
   const qrUrl  = documentId ? buildQrUrl(documentId, hash_document, 100) : null;
-  const avatarURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(prenom.charAt(0)+' '+nom.charAt(0))}&background=1a5a30&color=fff&bold=true&size=200`;
+  const avatarURL = generateAvatarSVG(prenom.charAt(0).toUpperCase() + nom.charAt(0).toUpperCase(), '#1a5a30');
 
   const CARD = { width: '100%', maxWidth: 720, fontFamily: 'Arial, sans-serif' };
   // CNI guinéenne = document ROSE/FUCHSIA selon normes officielles (Décret D/95/254)
@@ -499,7 +510,7 @@ const CarteIdentiteCEDEAO = ({ acte, user, documentId, hash_document }) => {
           {/* Photo + empreinte */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6, flexShrink: 0 }}>
             <div style={{ width: 88, height: 108, border: '2.5px solid #9B1B5A', borderRadius: 4, overflow: 'hidden', background: '#e8c0d4', boxShadow: '0 2px 8px rgba(0,0,0,0.12)' }}>
-              <img src={avatarURL} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" />
+              <img src={avatarURL} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             {/* Empreinte digitale */}
             <div style={{ width: 88, height: 32, border: '1.5px solid #8ab88a', borderRadius: 4, display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(255,255,255,0.6)', gap: 4 }}>
@@ -655,13 +666,13 @@ const ActeNaissance = ({ acte, user, documentId, hash_document }) => {
   );
 
   const Row = ({ label, value, label2, value2 }) => (
-    <div style={{ display: 'grid', gridTemplateColumns: label2 ? '1fr 1fr' : '1fr', borderBottom: `1px solid #d0b8e8`, minHeight: 26 }}>
-      <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr', borderRight: label2 ? `1px solid #d0b8e8` : 'none' }}>
+    <div className={`acte-row-outer${label2 ? ' acte-row-double' : ''}`} style={{ display: 'grid', gridTemplateColumns: label2 ? '1fr 1fr' : '1fr', borderBottom: `1px solid #d0b8e8`, minHeight: 26 }}>
+      <div className="acte-row-inner" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,130px) 1fr', borderRight: label2 ? `1px solid #d0b8e8` : 'none' }}>
         <div style={{ padding: '4px 8px', fontSize: 8.5, color: '#5a3a6a', fontStyle: 'italic', fontWeight: 600, background: LIGHT_PURPLE, display: 'flex', alignItems: 'center', borderRight: `1px solid #d0b8e8` }}>{label}</div>
         <div style={{ padding: '4px 8px', fontSize: 10.5, fontWeight: 700, color: '#111', display: 'flex', alignItems: 'center' }}>{value || '—'}</div>
       </div>
       {label2 && (
-        <div style={{ display: 'grid', gridTemplateColumns: '140px 1fr' }}>
+        <div className="acte-row-inner" style={{ display: 'grid', gridTemplateColumns: 'minmax(0,130px) 1fr' }}>
           <div style={{ padding: '4px 6px', fontSize: 8.5, color: '#5a3a6a', fontStyle: 'italic', fontWeight: 600, background: LIGHT_PURPLE, display: 'flex', alignItems: 'center', borderRight: `1px solid #d0b8e8` }}>{label2}</div>
           <div style={{ padding: '4px 6px', fontSize: 10.5, fontWeight: 700, color: '#111', display: 'flex', alignItems: 'center' }}>{value2 || '—'}</div>
         </div>
@@ -670,7 +681,7 @@ const ActeNaissance = ({ acte, user, documentId, hash_document }) => {
   );
 
   return (
-    <div style={{ fontFamily: 'Times New Roman, Georgia, serif', maxWidth: 750, margin: '0 auto' }}>
+    <div className="acte-doc-wrap" style={{ fontFamily: 'Times New Roman, Georgia, serif', maxWidth: 750, margin: '0 auto' }}>
       <div style={{
         border: `5px solid ${PURPLE}`,
         borderRadius: 4,
@@ -678,12 +689,12 @@ const ActeNaissance = ({ acte, user, documentId, hash_document }) => {
         boxShadow: '0 8px 32px rgba(92,45,130,0.18)',
       }}>
         <div style={{ border: `2.5px solid #9b5cc8`, margin: 6, borderRadius: 2 }}>
-          <div style={{ padding: '16px 20px' }}>
+          <div className="acte-content-pad" style={{ padding: '16px 20px' }}>
 
             {/* ── EN-TÊTE ── */}
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 12, alignItems: 'center', marginBottom: 16 }}>
+            <div className="acte-header-grid" style={{ display: 'grid', gridTemplateColumns: '1fr auto 1fr', gap: 8, alignItems: 'flex-start', marginBottom: 16 }}>
               {/* Gauche : références */}
-              <div style={{ fontSize: 8.5, color: '#555', lineHeight: 1.8 }}>
+              <div className="acte-hdr-left" style={{ fontSize: 8.5, color: '#555', lineHeight: 1.8 }}>
                 <div>République de Guinée</div>
                 <div>Ministère de l'Administration</div>
                 <div>du Territoire (MATD)</div>
@@ -692,7 +703,7 @@ const ActeNaissance = ({ acte, user, documentId, hash_document }) => {
               </div>
 
               {/* Centre : Titre */}
-              <div style={{ textAlign: 'center' }}>
+              <div className="acte-hdr-centre" style={{ textAlign: 'center' }}>
                 {/* Armoiries République de Guinée */}
                 <svg width="52" height="52" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg" style={{ display:'block', margin:'0 auto 2px' }}>
                   <circle cx="50" cy="50" r="47" fill="#f5f0ff" stroke={PURPLE} strokeWidth="2.5"/>
@@ -711,12 +722,12 @@ const ActeNaissance = ({ acte, user, documentId, hash_document }) => {
               </div>
 
               {/* Droite : numéros */}
-              <div style={{ textAlign: 'right', fontSize: 8.5, color: '#555', lineHeight: 1.8 }}>
+              <div className="acte-hdr-right" style={{ textAlign: 'right', fontSize: 8.5, color: '#555', lineHeight: 1.8 }}>
                 <div>N° Certificat : <strong style={{ color: PURPLE }}>{numCert}</strong></div>
                 <div>N° Identif. National : <strong style={{ color: PURPLE }}>{numIdNat.slice(0, 12)}</strong></div>
                 <div style={{ marginTop: 8 }}>
                   {qrUrl && (
-                    <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
+                    <div className="acte-qr-zone" style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 3 }}>
                       <div style={{ background: '#fff', padding: 4, border: `1.5px solid ${PURPLE}`, borderRadius: 4, display: 'inline-block' }}>
                         <img src={qrUrl} alt="QR Code" width={90} height={90} style={{ display: 'block' }} crossOrigin="anonymous" />
                       </div>
@@ -803,7 +814,7 @@ const PermisConduire = ({ acte, user, documentId, hash_document }) => {
   const today  = fmtDateFR(new Date());
   const expiry = addYrs(5);
   const qrUrl  = documentId ? buildQrUrl(documentId, hash_document, 90) : null;
-  const avatarURL = `https://ui-avatars.com/api/?name=${encodeURIComponent(prenom.charAt(0)+' '+nom.charAt(0))}&background=1a2e0d&color=fff&bold=true&size=200`;
+  const avatarURL = generateAvatarSVG(prenom.charAt(0).toUpperCase() + nom.charAt(0).toUpperCase(), '#1a2e0d');
 
   const cats = [
     { c: 'AM', icon: '🛵', desc: 'Cyclomoteur', date: null },
@@ -859,11 +870,11 @@ const PermisConduire = ({ acte, user, documentId, hash_document }) => {
         </div>
 
         {/* Corps recto */}
-        <div style={{ display: 'flex', gap: 14, padding: '0 16px 14px', position: 'relative', zIndex: 1 }}>
+        <div className="permis-body-row" style={{ display: 'flex', gap: 14, padding: '0 16px 14px', position: 'relative', zIndex: 1 }}>
           {/* Photo */}
           <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 8, flexShrink: 0 }}>
             <div style={{ width: 86, height: 106, border: '2.5px solid #8bc34a', borderRadius: 4, overflow: 'hidden', boxShadow: '0 2px 8px rgba(0,0,0,0.3)' }}>
-              <img src={avatarURL} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} crossOrigin="anonymous" />
+              <img src={avatarURL} alt="Photo" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
             </div>
             {qrUrl && (
               <div style={{ background: '#fff', padding: 4, border: '2px solid #8bc34a', borderRadius: 4 }}>
@@ -913,7 +924,7 @@ const PermisConduire = ({ acte, user, documentId, hash_document }) => {
 
         <div style={{ padding: '14px 16px', position: 'relative', zIndex: 1 }}>
           <div style={{ fontSize: 10, fontWeight: 700, color: '#1a3a10', marginBottom: 10, letterSpacing: 0.5 }}>9. Catégories habilitées / Authorized categories</div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, marginBottom: 14 }}>
+          <div className="permis-cats-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(6, 1fr)', gap: 6, marginBottom: 14 }}>
             {cats.map(cat => (
               <div key={cat.c} style={{
                 border: `2px solid ${cat.date ? '#2d5a1a' : '#ccc'}`,

@@ -93,8 +93,8 @@ const Aide = () => {
 
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: 16, marginBottom: 40 }}>
             {[
-              { icon: <Phone size={22} color="#006D44" />, label: 'Téléphone', val: '+224 655 00 00 00', sub: 'Lun-Sam 8h-20h' },
-              { icon: <Mail size={22} color="#006D44" />, label: 'Email', val: 'support@identiguinee.gov.gn', sub: 'Réponse sous 24h' },
+              { icon: <Phone size={22} color="#006D44" />, label: 'Téléphone', val: '+224 624 064 783', sub: 'Lun-Sam 8h-20h' },
+              { icon: <Mail size={22} color="#006D44" />, label: 'Email', val: 'mb624064783@gmail.com', sub: 'Réponse sous 24h' },
               { icon: <Clock size={22} color="#006D44" />, label: 'Horaires', val: 'Lun - Sam', sub: '8h00 - 20h00' },
             ].map((card, index) => (
               <div key={index} style={{ background: '#fff', border: '1px solid #e8e8e8', borderRadius: 12, padding: '18px 16px', textAlign: 'center', boxShadow: '0 2px 8px rgba(0,0,0,0.05)' }}>
@@ -118,6 +118,8 @@ const Aide = () => {
             <div style={{ position: 'relative', marginBottom: 20 }}>
               <Search size={16} style={{ position: 'absolute', left: 14, top: '50%', transform: 'translateY(-50%)', color: '#aaa' }} />
               <input
+                id="field-search-faq"
+                name="search-faq"
                 type="text"
                 placeholder="Rechercher dans la FAQ..."
                 value={searchQuery}
@@ -190,6 +192,8 @@ const Aide = () => {
               </div>
               <div style={{ padding: '10px 12px', borderTop: '1px solid #eee', display: 'flex', gap: 8 }}>
                 <input
+                  id="field-chat-input"
+                  name="chat-input"
                   type="text"
                   value={chatInput}
                   onChange={e => setChatInput(e.target.value)}
