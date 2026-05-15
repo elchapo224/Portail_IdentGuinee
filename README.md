@@ -43,7 +43,7 @@
 | Document | Ancien tarif | Nouveau tarif | Délai |
 |----------|-------------|---------------|-------|
 | CNI Biométrique | Gratuit | **50 000 GNF** | 72h ouvrables |
-| Passeport | 500 000 GNF | **300 000 GNF** | 15 jours |
+| Passeport | 500 000 GNF | **500 000 GNF** | 15 jours |
 | Extrait de naissance | 15 000 GNF | **10 000 GNF** | 24h ouvrables |
 | Permis de conduire | 250 000 GNF | **150 000 GNF** | 7 jours |
 
